@@ -21,12 +21,13 @@ protected:
     Statement();
     Statement(const Statement&);
     Statement(Statement&&);
+
+public:
     virtual ~Statement();
 
     Statement& operator=(const Statement&);
     Statement& operator=(Statement&&);
 
-public:
     virtual void dump(std::ostream& stream) const = 0;
     virtual Result execute(const Database& db) const = 0;
 };
@@ -40,15 +41,46 @@ inline std::ostream& operator<<(std::ostream& stream, const Statement& stmt)
 namespace stmt
 {
 
+template<typename D>
+class StatementD : public Statement
+{
+protected:
+    StatementD(const StatementD&) = default;
+    StatementD(StatementD&&) = default;
+
+    template<typename... A>
+    StatementD(A&&... data) :
+        data(std::forward<A>(data)...)
+    {}
+
+public:
+    ~StatementD() override = default;
+
+    StatementD& operator=(const StatementD&) = default;
+    StatementD& operator=(StatementD&&) = default;
+
+    void dump(std::ostream& stream) const override
+    {
+        data.dump(stream);
+    }
+    Result execute(const Database& db) const override
+    {
+        return data.execute(db);
+    }
+
+protected:
+    D data;
+};
+
 class CreateTableData
 {
 public:
     CreateTableData(std::string const &tableName, bool ifNotExists);
 
-    CreateTableData(CreateTableData const&);
+    CreateTableData(const CreateTableData&);
     CreateTableData(CreateTableData&&);
 
-    CreateTableData& operator=(CreateTableData const&);
+    CreateTableData& operator=(const CreateTableData&);
     CreateTableData& operator=(CreateTableData&&);
 
     void addColumnDesc(const std::string& name, const std::string& type);
@@ -71,32 +103,23 @@ private:
 };
 
 template<typename... V>
-class CreateTable : public Statement
+class CreateTable final : public StatementD<CreateTableData>
 {
-protected:
-    using Statement::Statement;
-    CreateTable(const std::string& name, bool ifNotExists) :
-        data(name, ifNotExists)
-    {}
+private:
+    using StatementD::StatementD;
+    CreateTable(const Table<V...>& table, bool ifNotExists) :
+        StatementD(table.getName(), ifNotExists)
+    {
+        insertColumns(table);
+    }
 
 public:
     static CreateTable<V...> make(const Table<V...>& table, bool ifNotExists)
     {
-        CreateTable<V...> ret(table.getName(), ifNotExists);
-        ret.insertColumns(table);
-        return ret;
+        return CreateTable<V...>(table, ifNotExists);
     }
 
     ~CreateTable() override = default;
-
-    void dump(std::ostream& stream) const override
-    {
-        data.dump(stream);
-    }
-    Result execute(const Database& db) const override
-    {
-        return data.execute(db);
-    }
 
 private:
     template<size_t N = 0>
@@ -108,9 +131,6 @@ private:
         if constexpr(N + 1 < Table<V...>::COLUMN_COUNT)
             insertColumns<N + 1>(table);
     }
-
-private:
-    CreateTableData data;
 };
 
 class InsertData
@@ -140,12 +160,12 @@ template<typename T>
 class InsertRow;
 
 template<typename T>
-class Insert : public Statement
+class Insert final : public StatementD<InsertData>
 {
-protected:
-    using Statement::Statement;
+private:
+    using StatementD::StatementD;
     explicit Insert(const std::string& tableName) :
-        data(tableName)
+        StatementD(tableName)
     {}
 
 public:
@@ -156,34 +176,28 @@ public:
 
     ~Insert() override = default;
 
-    void dump(std::ostream& stream) const override
-    {
-        data.dump(stream);
-    }
-    Result execute(const Database& db) const override
-    {
-        return data.execute(db);
-    }
-
     template<typename V, typename... VV>
-    InsertRow<T> values(V&& value, VV&&... values) const
+    InsertRow<T> values(V&& value, VV&&... values) const &
     {
         return InsertRow<T>(data, std::forward<V>(value), std::forward<VV>(values)...);
     }
 
-private:
-    InsertData data;
+    template<typename V, typename... VV>
+    InsertRow<T> values(V&& value, VV&&... values) &&
+    {
+        return InsertRow<T>(std::move(data), std::forward<V>(value), std::forward<VV>(values)...);
+    }
 };
 
 template<typename T>
-class InsertRow : public Statement
+class InsertRow final : public StatementD<InsertData>
 {
-protected:
-    using Statement::Statement;
+private:
+    using StatementD::StatementD;
 
     template<typename... V>
     InsertRow(const InsertData& data, V&&... values) :
-        data(data)
+        StatementD(data)
     {
         static_assert(std::tuple_size_v<std::tuple<V...>> == T::COLUMN_COUNT,
             "Values count does not match to columns count in the table");
@@ -191,8 +205,8 @@ protected:
     }
 
     template<typename... V>
-    explicit InsertRow(InsertData&& data, V&&... values) :
-        data(std::move(data))
+    InsertRow(InsertData&& data, V&&... values) :
+        StatementD(std::move(data))
     {
         static_assert(std::tuple_size_v<std::tuple<V...>> == T::COLUMN_COUNT,
             "Values count does not match to columns count in the table");
@@ -203,15 +217,6 @@ protected:
 
 public:
     ~InsertRow() override = default;
-
-    void dump(std::ostream& stream) const override
-    {
-        data.dump(stream);
-    }
-    Result execute(const Database& db) const override
-    {
-        return data.execute(db);
-    }
 
 private:
     template<typename U>
@@ -226,24 +231,20 @@ private:
         static_assert(std::is_same_v<ValType<V>, ColType<N>>,
             "Value type does not match to column's one");
         data.addValue(createBind(std::forward<V>(value)));
-        addValues(std::forward<VV>(values)...);
+        if constexpr(std::tuple_size_v<std::tuple<VV...>>)
+            addValues(std::forward<VV>(values)...);
     }
-    void addValues()
-    {}
-
-private:
-    InsertData data;
 };
 
 template<typename T>
-class InsertValues : public Statement
+class InsertValues final : public StatementD<InsertData>
 {
-protected:
-    using Statement::Statement;
+private:
+    using StatementD::StatementD;
 
     template<typename... V>
     InsertValues(const std::string& tableName, const Value<T, V>&... values) :
-        data(tableName)
+        StatementD(tableName)
     {
         addValues(values...);
     }
@@ -257,90 +258,84 @@ public:
 
     ~InsertValues() override = default;
 
-    void dump(std::ostream& stream) const override
-    {
-        data.dump(stream);
-    }
-    Result execute(const Database& db) const override
-    {
-        return data.execute(db);
-    }
-
 private:
     template<typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
     {
         data.addValue(value.getColumn().getName(), createBind(value.getValue()));
-        addValues(std::forward<VV>(values)...);
+        if constexpr(std::tuple_size_v<std::tuple<VV...>>)
+            addValues(std::forward<VV>(values)...);
     }
-    void addValues()
-    {}
-
-private:
-    InsertData data;
 };
 
-//template<typename V, typename... VV>
-//InsertValues<T> Insert<T>::values(T&& value, TT&&... values)
-//{
-//    InsertValues ret;
-//    ret.tableName = tableName;
-//    ret.addValues(std::forward<T>(value), std::forward<TT>(values)...);
-//    return ret;
-//}
+class SelectData
+{
+public:
+    SelectData();
 
-//class SelectWhere : public Statement
-//{
-//protected:
-//    using Statement::Statement;
-//    friend class Select;
-//
-//public:
-//    ~SelectWhere() override;
-//};
-//
-//class Select : public Statement
-//{
-//protected:
-//    using Statement::Statement;
-//
-//public:
-//    template<typename T, typename... TT>
-//    static Select make(T&& t, TT&&... tt)
-//    {
-//        Select res(std::string("SELECT FROM "));
-//        res.from(std::forward<T>(t), std::forward<TT>(tt)...);
-//        return res;
-//    }
-//
-//    ~Select() override;
-//
+    SelectData(const SelectData&);
+    SelectData(SelectData&&);
+
+    SelectData& operator=(const SelectData&);
+    SelectData& operator=(SelectData&&);
+
+    void addColumn(const std::string& tableName, const std::string& columnName);
+
+    void dump(std::ostream& stream) const;
+    Result execute(const Database& db) const;
+
+private:
+    std::vector<std::string> tables;
+    std::vector<std::string> columns;
+};
+
+template<typename C, typename... CC>
+class Select final : public StatementD<SelectData>
+{
+private:
+    using StatementD::StatementD;
+
+    Select(const C& c, const CC&... cc)
+    {
+        selectColumns(c, cc...);
+    }
+
+public:
+    static Select<C, CC...> make(const C& c, const CC&... cc)
+    {
+        return Select<C, CC...>(c, cc...);
+    }
+
+    ~Select() override = default;
+
 //    SelectWhere where()
 //    {
 //        return SelectWhere(std::string(request));
 //    }
-//
-//private:
-//    template<typename T, typename... TT>
-//    void from(T&& t, TT&&... tt)
-//    {
-//        fromHandler(t);
-//        from(std::forward<TT>(tt)...);
-//    }
-//    void from()
-//    {}
-//
-//    void fromHandler(const Table& table);
-//    void fromHandler(const ColumnBase& column);
-//};
+
+private:
+    template<typename U, typename... UU>
+    void selectColumns(const U& c, const UU&... cc)
+    {
+        selectColumn(c);
+        if constexpr(std::tuple_size_v<std::tuple<UU...>>)
+            selectColumns(cc...);
+    }
+
+    template<typename... V>
+    void selectColumn(const Table<V...>& table)
+    {
+        data.addColumn(table.getName(), "*");
+    }
+
+    template<typename T, typename V>
+    void selectColumn(const Column<T, V>& column)
+    {
+        data.addColumn(column.getTable().getName(), column.getName());
+    }
+};
 
 } /* namespace stmt */
-
-//template<typename... T>
-//stmt::Select select(T&&... t)
-//{
-//    return stmt::Select::make(std::forward<T>(t)...);
-//}
 
 template<typename... V>
 inline stmt::CreateTable<V...> createTable(const Table<V...>& table)
@@ -361,11 +356,15 @@ inline stmt::Insert<Table<V...>> insertInto(const Table<V...>& table)
 }
 
 template<typename V, typename... VV>
-inline stmt::InsertValues<typename V::Table> insertValues(
-    const V& value,
-    const VV&... values)
+inline stmt::InsertValues<typename V::Table> insertValues(const V& value, const VV&... values)
 {
     return stmt::InsertValues<typename V::Table>::make(value, values...);
+}
+
+template<typename C, typename... CC>
+inline stmt::Select<C, CC...> select(const C& column, const CC&... columns)
+{
+    return stmt::Select<C, CC...>::make(column, columns...);
 }
 
 } /* namespace sqlpp */

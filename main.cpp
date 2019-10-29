@@ -25,11 +25,17 @@ struct Pack
     char value = '0';
 };
 
+struct NotPack
+{
+    std::string val;
+};
+
 namespace sqlpp
 {
 template<>
 struct Converter<Pack>
 {
+    using DbType = Blob;
     static Blob toDb(const Pack& value)
     {
         return Blob();
@@ -69,7 +75,8 @@ int main(int argc, char* argv[])
     Table<int, string> mt("MyTable", {"id", "text"});
     YaTable yt;
 
-    createTable(mt).execute(db);
+    auto cStmt = createTable(mt);
+    cStmt.execute(db);
     createTableIfNotExists(yt).execute(db);
 
     auto insStmt = insertInto(mt).values(10, "Hi"s);
@@ -78,10 +85,11 @@ int main(int argc, char* argv[])
     auto insStmt2 = insertValues(yt.id << 0, yt.comment << "Just another table"s);
     insStmt2.execute(db);
 
-    insertInto(yt).execute(db);
+    auto insStmt3 = insertInto(yt);
+    insStmt3.execute(db);
 
-//    auto stmt = select(mt, mt.id).where();
-//    stmt.dump(cout);
+    auto selStmt = select(yt, yt.id);
+    cout << selStmt << endl;
 
     return 0;
 }

@@ -13,6 +13,8 @@ template<typename T, typename V>
 class Column
 {
 public:
+    using TableType = T;
+
     Column(const T& table, const std::string& name) :
         table(table), name(name)
     {}

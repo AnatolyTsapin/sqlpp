@@ -2,6 +2,7 @@
 #include "database.h"
 
 #include <sstream>
+#include <algorithm>
 
 #include <sqlite3.h>
 
@@ -125,6 +126,48 @@ Result InsertData::execute(const Database& db) const
     ostringstream ss;
     dump(ss);
     return db.execute(ss.str(), binds);
+}
+
+SelectData::SelectData()
+{}
+
+SelectData::SelectData(const SelectData&) = default;
+SelectData::SelectData(SelectData&&) = default;
+SelectData& SelectData::operator=(const SelectData&) = default;
+SelectData& SelectData::operator=(SelectData&&) = default;
+
+void SelectData::addColumn(const string& tableName, const string& columnName)
+{
+    if(find(begin(tables), end(tables), tableName) == end(tables))
+        tables.push_back(tableName);
+    columns.push_back(tableName + "." + columnName);
+}
+
+void SelectData::dump(ostream& stream) const
+{
+    stream << "SELECT ";
+    bool first = true;
+    for(auto&& c : columns)
+    {
+        if(!first)
+            stream << ", ";
+        first = false;
+        stream << c;
+    }
+    stream << " FROM ";
+    first = true;
+    for(auto&& t : tables)
+    {
+        if(!first)
+            stream << ", ";
+        first = false;
+        stream << t;
+    }
+}
+
+Result SelectData::execute(const Database& db) const
+{
+    return Result();
 }
 
 } /* namespace stmt */
