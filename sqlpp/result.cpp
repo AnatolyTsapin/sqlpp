@@ -1,4 +1,4 @@
-#include "result.h"
+#include <sqlpp/result.h>
 
 namespace sqlpp
 {

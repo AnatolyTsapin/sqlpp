@@ -1,8 +1,8 @@
 #ifndef SQLPP_DATABASE_H_
 #define SQLPP_DATABASE_H_
 
-#include "types.h"
-#include "result.h"
+#include <sqlpp/types.h>
+#include <sqlpp/result.h>
 
 #include <string>
 #include <memory>

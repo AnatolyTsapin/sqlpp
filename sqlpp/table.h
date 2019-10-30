@@ -1,8 +1,8 @@
 #ifndef SQLPP_TABLE_H_
 #define SQLPP_TABLE_H_
 
-#include "column.h"
-#include "types.h"
+#include <sqlpp/column.h>
+#include <sqlpp/types.h>
 
 #include <string>
 #include <tuple>

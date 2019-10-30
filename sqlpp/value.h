@@ -1,7 +1,7 @@
 #ifndef SQLPP_VALUE_H_
 #define SQLPP_VALUE_H_
 
-#include "types.h"
+#include <sqlpp/types.h>
 
 #include <optional>
 

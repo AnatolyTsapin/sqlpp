@@ -7,8 +7,13 @@ include_directories(
     )
 
 set(SQLPP_SRC
-    sqlpp/database.cpp sqlpp/statement.cpp sqlpp/table.cpp sqlpp/column.cpp sqlpp/value.cpp
-    sqlpp/result.cpp sqlpp/types.cpp
+    sqlpp/database.cpp
+    sqlpp/result.cpp
+    sqlpp/types.cpp
+    sqlpp/stmt/common.cpp
+    sqlpp/stmt/create.cpp
+    sqlpp/stmt/insert.cpp
+    sqlpp/stmt/select.cpp
     )
 
 set(LAUNCHER_SRC
