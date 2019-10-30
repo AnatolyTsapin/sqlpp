@@ -5,20 +5,6 @@
 using namespace std;
 using namespace sqlpp;
 
-//class MyTable : public Table<MyTable, int, string>
-//{
-//public:
-//    MyTable() :
-//        Table("MyTable", {"id", "text"}),
-//        id(*this, "id"),
-//        text(*this, "text")
-//    {}
-//    ~MyTable() override = default;
-//
-//    Column<0> id;
-//    Column<1> text;
-//};
-
 struct Pack
 {
     int id = 0;
@@ -47,14 +33,21 @@ struct Converter<Pack>
 };
 }
 
-class YaTable : public Table<char, string, double>
+class MyTable final : public Table<MyTable, int, string>
+{
+public:
+    MyTable() : Table("MyTable", {"id", "text"})
+    {}
+
+    Column<0> id = column<0>();
+    Column<1> text = column<1>();
+};
+
+class YaTable final : public Table<YaTable, char, string, double>
 {
 public:
     YaTable() :
-        Table("YaTable", {"id", "comment", "value"}),
-        id(*this, "id"),
-        comment(*this, "comment"),
-        value(*this, "value")
+        Table("YaTable", {"id", "comment", "value"})
     {}
     ~YaTable() override = default;
 
@@ -72,7 +65,7 @@ int main(int argc, char* argv[])
 //    sqlite3_close(db);
 
     Database db("test.db");
-    Table<int, string> mt("MyTable", {"id", "text"});
+    MyTable mt;
     YaTable yt;
 
     auto cStmt = createTable(mt);
@@ -82,7 +75,7 @@ int main(int argc, char* argv[])
     auto insStmt = insertInto(mt).values(10, "Hi"s);
     insStmt.execute(db);
 
-    auto insStmt2 = insertValues(yt.id << 0, yt.comment << "Just another table"s);
+    auto insStmt2 = insertValues(yt.id << '0', yt.comment << "Just another table"s);
     insStmt2.execute(db);
 
     auto insStmt3 = insertInto(yt);

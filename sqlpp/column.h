@@ -30,7 +30,7 @@ public:
     }
 
     template<typename U>
-    Value<T, V> operator <<(U&& value)
+    Value<T, V> operator <<(U&& value) const
     {
         return Value<T, V>(*this, toDb(std::forward<U>(value)));
     }

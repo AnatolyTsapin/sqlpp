@@ -102,33 +102,33 @@ private:
     std::vector<ColumnDesc> columnDesc;
 };
 
-template<typename... V>
+template<typename T, typename... V>
 class CreateTable final : public StatementD<CreateTableData>
 {
 private:
     using StatementD::StatementD;
-    CreateTable(const Table<V...>& table, bool ifNotExists) :
+    CreateTable(const Table<T, V...>& table, bool ifNotExists) :
         StatementD(table.getName(), ifNotExists)
     {
         insertColumns(table);
     }
 
 public:
-    static CreateTable<V...> make(const Table<V...>& table, bool ifNotExists)
+    static CreateTable<T, V...> make(const Table<T, V...>& table, bool ifNotExists)
     {
-        return CreateTable<V...>(table, ifNotExists);
+        return CreateTable<T, V...>(table, ifNotExists);
     }
 
     ~CreateTable() override = default;
 
 private:
     template<size_t N = 0>
-    void insertColumns(const Table<V...>& table)
+    void insertColumns(const Table<T, V...>& table)
     {
         data.addColumnDesc(
             table.getColumnName(N),
-            TypeName<std::tuple_element_t<N, typename Table<V...>::Row>>::get());
-        if constexpr(N + 1 < Table<V...>::COLUMN_COUNT)
+            TypeName<std::tuple_element_t<N, typename Table<T, V...>::Row>>::get());
+        if constexpr(N + 1 < Table<T, V...>::COLUMN_COUNT)
             insertColumns<N + 1>(table);
     }
 };
@@ -322,8 +322,8 @@ private:
             selectColumns(cc...);
     }
 
-    template<typename... V>
-    void selectColumn(const Table<V...>& table)
+    template<typename T, typename... V>
+    void selectColumn(const Table<T, V...>& table)
     {
         data.addColumn(table.getName(), "*");
     }
@@ -337,22 +337,22 @@ private:
 
 } /* namespace stmt */
 
-template<typename... V>
-inline stmt::CreateTable<V...> createTable(const Table<V...>& table)
+template<typename T, typename... V>
+inline stmt::CreateTable<T, V...> createTable(const Table<T, V...>& table)
 {
-    return stmt::CreateTable<V...>::make(table, false);
+    return stmt::CreateTable<T, V...>::make(table, false);
 }
 
-template<typename... V>
-inline stmt::CreateTable<V...> createTableIfNotExists(const Table<V...>& table)
+template<typename T, typename... V>
+inline stmt::CreateTable<T, V...> createTableIfNotExists(const Table<T, V...>& table)
 {
-    return stmt::CreateTable<V...>::make(table, true);
+    return stmt::CreateTable<T, V...>::make(table, true);
 }
 
-template<typename... V>
-inline stmt::Insert<Table<V...>> insertInto(const Table<V...>& table)
+template<typename T, typename... V>
+inline stmt::Insert<Table<T, V...>> insertInto(const Table<T, V...>& table)
 {
-    return stmt::Insert<Table<V...>>::make(table);
+    return stmt::Insert<Table<T, V...>>::make(table);
 }
 
 template<typename V, typename... VV>
