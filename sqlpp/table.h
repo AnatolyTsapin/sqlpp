@@ -15,7 +15,7 @@ template<typename T, typename... V>
 class Table
 {
 public:
-    using Self = T;
+    using TableType = T;
 
     using Row = std::tuple<typename Converter<V>::DbType...>;
 
@@ -23,7 +23,7 @@ public:
     using Field = std::tuple_element_t<N, Row>;
 
     template<size_t N>
-    using Column = sqlpp::Column<Self, std::tuple_element_t<N, std::tuple<V...>>>;
+    using Column = sqlpp::Column<TableType, std::tuple_element_t<N, std::tuple<V...>>>;
 
     static constexpr size_t COLUMN_COUNT = std::tuple_size_v<Row>;
 
@@ -40,7 +40,7 @@ public:
     template<size_t N>
     Column<N> column() const
     {
-        return Column<N>(static_cast<const Self&>(*this), columnNames[N]);
+        return Column<N>(static_cast<const TableType&>(*this), columnNames[N]);
     }
 
     const std::string& getColumnName(size_t i) const

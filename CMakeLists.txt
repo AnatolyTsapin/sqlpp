@@ -8,6 +8,7 @@ include_directories(
 
 set(SQLPP_SRC
     sqlpp/database.cpp
+    sqlpp/condition.cpp
     sqlpp/result.cpp
     sqlpp/types.cpp
     sqlpp/stmt/common.cpp

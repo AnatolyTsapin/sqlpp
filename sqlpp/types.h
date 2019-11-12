@@ -142,6 +142,133 @@ auto createBind(V&& value)
     return [v = toDb(std::forward<V>(value))] (sqlite3_stmt* stmt, int idx) { bind(stmt, idx, v); };
 }
 
+template<typename T>
+using TableType = typename T::TableType;
+
+namespace types
+{
+
+template<typename... T>
+struct PackSizeS;
+
+template<typename... T>
+inline constexpr size_t PackSize = PackSizeS<T...>::value;
+
+template<typename T, typename... TT>
+struct PackSizeS<T, TT...>
+{
+    static constexpr size_t value = 1 + PackSize<TT...>;
+};
+
+template<>
+struct PackSizeS<>
+{
+    static constexpr size_t value = 0;
+};
+
+template<typename... T>
+struct List
+{};
+
+template<typename T, typename... TT>
+struct List<T, TT...>
+{
+    using Head = T;
+    using Tail = List<TT...>;
+};
+
+template<typename L>
+using Head = typename L::Head;
+
+template<typename L>
+using Tail = typename L::Tail;
+
+template<size_t I, typename L>
+struct GetS;
+
+template<size_t I, typename L>
+using Get = typename GetS<I, L>::Type;
+
+template<size_t I, typename... T>
+struct GetS<I, List<T...>>
+{
+    using Type = Get<I - 1, Tail<List<T...>>>;
+};
+
+template<typename... T>
+struct GetS<0, List<T...>>
+{
+    using Type = Head<List<T...>>;
+};
+
+template<typename U, typename L>
+struct ContainsS;
+
+template<typename U, typename L>
+inline constexpr bool Contains = ContainsS<U, L>::value;
+
+template<typename U, typename... T>
+struct ContainsS<U, List<T...>>
+{
+    static constexpr bool value = std::is_same_v<U, Head<List<T...>>> || Contains<U, Tail<List<T...>>>;
+};
+
+template<typename U>
+struct ContainsS<U, List<>>
+{
+    static constexpr bool value = false;
+};
+
+template<typename L>
+struct SizeS;
+
+template<typename L>
+inline constexpr size_t Size = SizeS<L>::value;
+
+template<typename... T>
+struct SizeS<List<T...>>
+{
+    static constexpr size_t value = 1 + Size<Tail<List<T...>>>;
+};
+
+template<>
+struct SizeS<List<>>
+{
+    static constexpr size_t value = 0;
+};
+
+template<typename U, typename L>
+struct AddS;
+
+template<typename U, typename L>
+using Add = typename AddS<U, L>::Type;
+
+template<typename U, typename... T>
+struct AddS<U, List<T...>>
+{
+    using Type = std::conditional_t<Contains<U, List<T...>>, List<T...>, List<U, T...>>;;
+};
+
+template<typename... T>
+struct MakeListS;
+
+template<typename... T>
+using MakeList = typename MakeListS<T...>::Type;
+
+template<typename T, typename... TT>
+struct MakeListS<T, TT...>
+{
+    using Type = Add<T, MakeList<TT...>>;
+};
+
+template<>
+struct MakeListS<>
+{
+    using Type = List<>;
+};
+
+} /* namespace types */
+
 } /* namespace sqlpp */
 
 #endif /* SQLPP_TYPES_H_ */

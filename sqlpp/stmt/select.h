@@ -41,6 +41,8 @@ private:
     }
 
 public:
+    using Tables = types::MakeList<TableType<C>, TableType<CC>...>;
+
     static Select<C, CC...> make(const C& c, const CC&... cc)
     {
         return Select<C, CC...>(c, cc...);
@@ -58,7 +60,7 @@ private:
     void selectColumns(const U& c, const UU&... cc)
     {
         selectColumn(c);
-        if constexpr(std::tuple_size_v<std::tuple<UU...>>)
+        if constexpr(types::PackSize<UU...>)
             selectColumns(cc...);
     }
 

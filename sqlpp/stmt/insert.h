@@ -74,7 +74,7 @@ private:
     InsertRow(const InsertData& data, V&&... values) :
         StatementD(data)
     {
-        static_assert(std::tuple_size_v<std::tuple<V...>> == T::COLUMN_COUNT,
+        static_assert(types::PackSize<V...> == T::COLUMN_COUNT,
             "Values count does not match to columns count in the table");
         addValues(std::forward<V>(values)...);
     }
@@ -83,7 +83,7 @@ private:
     InsertRow(InsertData&& data, V&&... values) :
         StatementD(std::move(data))
     {
-        static_assert(std::tuple_size_v<std::tuple<V...>> == T::COLUMN_COUNT,
+        static_assert(types::PackSize<V...> == T::COLUMN_COUNT,
             "Values count does not match to columns count in the table");
         addValues(std::forward<V>(values)...);
     }
@@ -102,11 +102,11 @@ private:
     template<typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
     {
-        constexpr size_t N = T::COLUMN_COUNT - std::tuple_size_v<std::tuple<V, VV...>>;
+        constexpr size_t N = T::COLUMN_COUNT - types::PackSize<V, VV...>;
         static_assert(std::is_same_v<ValType<V>, ColType<N>>,
             "Value type does not match to column's one");
         data.addValue(createBind(std::forward<V>(value)));
-        if constexpr(std::tuple_size_v<std::tuple<VV...>>)
+        if constexpr(types::PackSize<VV...>)
             addValues(std::forward<VV>(values)...);
     }
 };
