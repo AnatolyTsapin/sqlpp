@@ -154,6 +154,9 @@ struct PackSizeS;
 template<typename... T>
 inline constexpr size_t PackSize = PackSizeS<T...>::value;
 
+template<typename... T>
+inline constexpr size_t PackEmpty = PackSize<T...> == 0;
+
 template<typename T, typename... TT>
 struct PackSizeS<T, TT...>
 {
@@ -177,11 +180,35 @@ struct List<T, TT...>
     using Tail = List<TT...>;
 };
 
-template<typename L>
-using Head = typename L::Head;
+template<typename T>
+struct HeadS
+{
+    using Type = T;
+};
 
-template<typename L>
-using Tail = typename L::Tail;
+template<typename... T>
+struct HeadS<List<T...>>
+{
+    using Type = typename List<T...>::Head;
+};
+
+template<typename T>
+using Head = typename HeadS<T>::Type;
+
+template<typename T>
+struct TailS
+{
+    using Type = List<>;
+};
+
+template<typename... T>
+struct TailS<List<T...>>
+{
+    using Type = typename List<T...>::Tail;
+};
+
+template<typename T>
+using Tail = typename TailS<T>::Type;
 
 template<size_t I, typename L>
 struct GetS;
@@ -210,13 +237,19 @@ inline constexpr bool Contains = ContainsS<U, L>::value;
 template<typename U, typename... T>
 struct ContainsS<U, List<T...>>
 {
-    static constexpr bool value = std::is_same_v<U, Head<List<T...>>> || Contains<U, Tail<List<T...>>>;
+    static constexpr bool value = (std::is_same_v<Head<U>, Head<List<T...>>> || Contains<Head<U>, Tail<List<T...>>>) && Contains<Tail<U>, List<T...>>;
 };
 
 template<typename U>
 struct ContainsS<U, List<>>
 {
     static constexpr bool value = false;
+};
+
+template<typename... T>
+struct ContainsS<List<>, List<T...>>
+{
+    static constexpr bool value = true;
 };
 
 template<typename L>

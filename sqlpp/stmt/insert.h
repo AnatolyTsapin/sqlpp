@@ -74,14 +74,18 @@ private:
     InsertRow(const InsertData& data, V&&... values) :
         StatementD(data)
     {
-        static_assert(types::PackSize<V...> == T::COLUMN_COUNT,
-            "Values count does not match to columns count in the table");
-        addValues(std::forward<V>(values)...);
+        init(std::forward<V>(values)...);
     }
 
     template<typename... V>
     InsertRow(InsertData&& data, V&&... values) :
         StatementD(std::move(data))
+    {
+        init(std::forward<V>(values)...);
+    }
+
+    template<typename... V>
+    void init(V&&... values)
     {
         static_assert(types::PackSize<V...> == T::COLUMN_COUNT,
             "Values count does not match to columns count in the table");

@@ -2,6 +2,7 @@
 #define SRC_SQLPP_STMT_SELECT_H_
 
 #include <sqlpp/stmt/common.h>
+#include <sqlpp/condition.h>
 
 namespace sqlpp
 {
@@ -29,6 +30,9 @@ private:
     std::vector<std::string> columns;
 };
 
+template<typename T, typename C>
+class SelectWhere;
+
 template<typename C, typename... CC>
 class Select final : public StatementD<SelectData>
 {
@@ -50,10 +54,17 @@ public:
 
     ~Select() override = default;
 
-//    SelectWhere where()
-//    {
-//        return SelectWhere(std::string(request));
-//    }
+    template<typename... T>
+    SelectWhere<Tables, T...> where(const Condition<T...>& condition) const &
+    {
+        return SelectWhere<Tables, T...>(data, condition);
+    }
+
+    template<typename T>
+    SelectWhere<Tables, T> where(const Condition<T>& condition) &&
+    {
+        return SelectWhere<Tables, T>(std::move(data), condition);
+    }
 
 private:
     template<typename U, typename... UU>
@@ -75,6 +86,36 @@ private:
     {
         data.addColumn(column.getTable().getName(), column.getName());
     }
+};
+
+template<typename T, typename C>
+class SelectWhere final : public StatementD<SelectData>
+{
+private:
+    using StatementD::StatementD;
+
+    SelectWhere(const SelectData& data, const Condition<C>& condition) :
+        StatementD(data)
+    {
+        init(condition);
+    }
+
+    SelectWhere(SelectData&& data, const Condition<C>& condition) :
+        StatementD(std::move(data))
+    {
+        init(condition);
+    }
+
+    void init(const Condition<C>& condition)
+    {
+        static_assert(types::Contains<C, T>, "Condition contains column from table that is not in select request");
+    }
+
+    template<typename U, typename... UU>
+    friend class Select;
+
+public:
+    ~SelectWhere() override = default;
 };
 
 } /* namespace stmt */
