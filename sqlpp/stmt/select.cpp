@@ -26,6 +26,11 @@ void SelectData::addColumn(const string& tableName, const string& columnName)
     columns.push_back(tableName + "." + columnName);
 }
 
+void SelectData::addCondition(const condition::Data& cond)
+{
+    condition = cond;
+}
+
 void SelectData::dump(ostream& stream) const
 {
     stream << "SELECT ";
@@ -45,6 +50,12 @@ void SelectData::dump(ostream& stream) const
             stream << ", ";
         first = false;
         stream << t;
+    }
+
+    if(condition)
+    {
+        stream << " WHERE ";
+        condition.dump(stream);
     }
 }
 

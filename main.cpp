@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     auto insStmt3 = insertInto(yt);
     insStmt3.execute(db);
 
-    auto selStmt = select(yt, mt.id).where(yt.id == mt.id);
+    auto selStmt = select(yt, mt.id).where(yt.id == yt.id && yt.id == mt.id);
     cout << selStmt << endl;
 
     return 0;

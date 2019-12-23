@@ -22,12 +22,15 @@ public:
 
     void addColumn(const std::string& tableName, const std::string& columnName);
 
+    void addCondition(const condition::Data& cond);
+
     void dump(std::ostream& stream) const;
     Result execute(const Database& db) const;
 
 private:
     std::vector<std::string> tables;
     std::vector<std::string> columns;
+    condition::Data condition;
 };
 
 template<typename T, typename C>
@@ -54,10 +57,10 @@ public:
 
     ~Select() override = default;
 
-    template<typename... T>
-    SelectWhere<Tables, T...> where(const Condition<T...>& condition) const &
+    template<typename T>
+    SelectWhere<Tables, T> where(const Condition<T>& condition) const &
     {
-        return SelectWhere<Tables, T...>(data, condition);
+        return SelectWhere<Tables, T>(data, condition);
     }
 
     template<typename T>
@@ -109,6 +112,7 @@ private:
     void init(const Condition<C>& condition)
     {
         static_assert(types::Contains<C, T>, "Condition contains column from table that is not in select request");
+        data.addCondition(condition.data);
     }
 
     template<typename U, typename... UU>

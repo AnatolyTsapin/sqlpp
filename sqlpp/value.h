@@ -16,7 +16,7 @@ class Value
 {
 public:
     using Table = T;
-    using ValueT = typename Converter<V>::DbType;
+    using ValueT = DbType<V>;
 
     Value(const Column<T, V>& column, ValueT&& value) :
         column(column), value(std::forward<ValueT>(value))

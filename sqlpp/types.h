@@ -70,6 +70,9 @@ template<typename V, typename E = void>
 struct Converter;
 
 template<typename V>
+using DbType = typename Converter<V>::DbType;
+
+template<typename V>
 auto toDb(V&& value)
 {
     return Converter<V>::toDb(std::forward<V>(value));
@@ -298,6 +301,24 @@ template<>
 struct MakeListS<>
 {
     using Type = List<>;
+};
+
+template<typename L1, typename L2>
+struct MergeS;
+
+template<typename L1, typename L2>
+using Merge = typename MergeS<L1, L2>::Type;
+
+template<typename L1, typename T, typename... TT>
+struct MergeS<L1, List<T, TT...>>
+{
+    using Type = Add<T, Merge<L1, List<TT...>>>;
+};
+
+template<typename L1>
+struct MergeS<L1, List<>>
+{
+    using Type = L1;
 };
 
 } /* namespace types */
