@@ -75,13 +75,13 @@ int main(int argc, char* argv[])
     auto insStmt = insertInto(mt).values(10, "Hi"s);
     insStmt.execute(db);
 
-    auto insStmt2 = insertValues(yt.id << '0', yt.comment << "Just another table"s);
+    auto insStmt2 = insertValues(yt.id <<= '0', yt.comment <<= "Just another table"s);
     insStmt2.execute(db);
 
     auto insStmt3 = insertInto(yt);
     insStmt3.execute(db);
 
-    auto selStmt = select(yt, mt.id).where(yt.id == yt.id && yt.id == mt.id);
+    auto selStmt = select(yt, mt.id).where('0' == yt.id && yt.id == mt.id || yt.comment != "Test"s);
     cout << selStmt << endl;
 
     return 0;

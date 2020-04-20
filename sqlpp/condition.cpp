@@ -10,8 +10,13 @@ namespace condition
 
 static const std::string OpStr[] = {
     "=",
-    "!=",
+    "<>",
+	"<",
+	"<=",
+	">",
+	">=",
     "AND",
+	"OR"
 };
 
 Node::~Node() = default;
@@ -41,7 +46,7 @@ void Leaf::dump(std::ostream& stream) const
 
     case 1:
     {
-        stream << "value";
+        stream << "?";
         break;
     }
 

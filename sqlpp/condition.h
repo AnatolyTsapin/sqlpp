@@ -24,8 +24,13 @@ namespace condition
 enum class Op : int
 {
     EQ,
-    NEQ,
+    NE,
+	LS,
+	LE,
+	GT,
+	GE,
     AND,
+	OR,
 };
 
 class Node
@@ -169,10 +174,157 @@ auto operator==(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
         condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
 }
 
+template<typename T, typename V>
+auto operator==(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::EQ,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator==(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::EQ,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
+template<typename T1, typename V1, typename T2, typename V2>
+auto operator!=(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
+{
+    static_assert(std::is_same_v<DbType<V1>, DbType<V2>>, "Different DB types cannot be compared");
+    return Condition<types::MakeList<T1, T2>>(condition::Op::NE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
+}
+
+template<typename T, typename V>
+auto operator!=(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::NE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator!=(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::NE,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
+template<typename T1, typename V1, typename T2, typename V2>
+auto operator<(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
+{
+    static_assert(std::is_same_v<DbType<V1>, DbType<V2>>, "Different DB types cannot be compared");
+    return Condition<types::MakeList<T1, T2>>(condition::Op::LS,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
+}
+
+template<typename T, typename V>
+auto operator<(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::LS,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator<(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::LS,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
+template<typename T1, typename V1, typename T2, typename V2>
+auto operator<=(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
+{
+    static_assert(std::is_same_v<DbType<V1>, DbType<V2>>, "Different DB types cannot be compared");
+    return Condition<types::MakeList<T1, T2>>(condition::Op::LE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
+}
+
+template<typename T, typename V>
+auto operator<=(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::LE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator<=(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::LE,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
+template<typename T1, typename V1, typename T2, typename V2>
+auto operator>(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
+{
+    static_assert(std::is_same_v<DbType<V1>, DbType<V2>>, "Different DB types cannot be compared");
+    return Condition<types::MakeList<T1, T2>>(condition::Op::GT,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
+}
+
+template<typename T, typename V>
+auto operator>(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::GT,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator>(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::GT,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
+template<typename T1, typename V1, typename T2, typename V2>
+auto operator>=(const Column<T1, V1>& c1, const Column<T2, V2>& c2)
+{
+    static_assert(std::is_same_v<DbType<V1>, DbType<V2>>, "Different DB types cannot be compared");
+    return Condition<types::MakeList<T1, T2>>(condition::Op::GE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(c2.getTable().getName(), c2.getName()));
+}
+
+template<typename T, typename V>
+auto operator>=(const Column<T, V>& c1, V&& v2)
+{
+    return Condition<types::MakeList<T>>(condition::Op::GE,
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()),
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))));
+}
+
+template<typename T, typename V>
+auto operator>=(V&& v2, const Column<T, V>& c1)
+{
+    return Condition<types::MakeList<T>>(condition::Op::GE,
+        condition::Node::make<condition::Leaf>(createBind(std::forward<V>(v2))),
+        condition::Node::make<condition::Leaf>(c1.getTable().getName(), c1.getName()));
+}
+
 template<typename T1, typename T2>
 auto operator&&(const Condition<T1>& c1, const Condition<T2>& c2)
 {
     return Condition<types::Merge<T1, T2>>(condition::Op::AND, c1, c2);
+}
+
+template<typename T1, typename T2>
+auto operator||(const Condition<T1>& c1, const Condition<T2>& c2)
+{
+    return Condition<types::Merge<T1, T2>>(condition::Op::OR, c1, c2);
 }
 
 } /* namespace sqlpp */

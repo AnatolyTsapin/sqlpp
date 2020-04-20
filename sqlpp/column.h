@@ -29,10 +29,9 @@ public:
         return name;
     }
 
-    template<typename U>
-    Value<T, V> operator <<(U&& value) const
+    Value<T, V> operator <<=(V&& value) const
     {
-        return Value<T, V>(*this, toDb(std::forward<U>(value)));
+        return Value<T, V>(*this, toDb(std::forward<V>(value)));
     }
 
 protected:
