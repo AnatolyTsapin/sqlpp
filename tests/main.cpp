@@ -58,13 +58,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-//    sqlite3* db = nullptr;
-//    sqlite3_open("my.db", &db);
-//    sqlite3_exec(db, "create table if not exists tbl (id integer, txt text)", nullptr, nullptr, nullptr);
-//    sqlite3_exec(db, "insert into tbl values (1, \"Hi!\")", nullptr, nullptr, nullptr);
-//    sqlite3_close(db);
-
-    Database db("test.db");
+    Database db(":memory:");
     MyTable mt;
     YaTable yt;
 
