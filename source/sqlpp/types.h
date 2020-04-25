@@ -152,25 +152,7 @@ namespace types
 {
 
 template<typename... T>
-struct PackSizeS;
-
-template<typename... T>
-inline constexpr size_t PackSize = PackSizeS<T...>::value;
-
-template<typename... T>
-inline constexpr size_t PackEmpty = PackSize<T...> == 0;
-
-template<typename T, typename... TT>
-struct PackSizeS<T, TT...>
-{
-    static constexpr size_t value = 1 + PackSize<TT...>;
-};
-
-template<>
-struct PackSizeS<>
-{
-    static constexpr size_t value = 0;
-};
+inline constexpr size_t PackSize = sizeof...(T);
 
 template<typename... T>
 struct List

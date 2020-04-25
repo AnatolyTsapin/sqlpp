@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     auto insStmt3 = insertInto(yt);
     insStmt3.execute(db);
 
-    auto selStmt = select(yt, mt.id).where('0' == yt.id && yt.id == mt.id || yt.comment != "Test"s);
+    auto selStmt = select(yt).where(0L == yt.id && (~(yt.id + 1L) == -mt.id || yt.comment != "Test"s));
     cout << selStmt << endl;
 
     return 0;

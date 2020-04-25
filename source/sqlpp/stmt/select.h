@@ -4,6 +4,8 @@
 #include <sqlpp/stmt/common.h>
 #include <sqlpp/condition.h>
 
+#include <unordered_set>
+
 namespace sqlpp
 {
 namespace stmt
@@ -28,9 +30,10 @@ public:
     Result execute(const Database& db) const;
 
 private:
-    std::vector<std::string> tables;
+    std::unordered_set<std::string> tables;
     std::vector<std::string> columns;
-    condition::Data condition;
+    std::vector<Bind> binds;
+    condition::Node::Ptr root;
 };
 
 template<typename T, typename C>
@@ -42,7 +45,7 @@ class Select final : public StatementD<SelectData>
 private:
     using StatementD::StatementD;
 
-    Select(const C& c, const CC&... cc)
+    explicit Select(const C& c, const CC&... cc)
     {
         selectColumns(c, cc...);
     }
@@ -111,7 +114,6 @@ private:
 
     void init(const Condition<C>& condition)
     {
-        static_assert(types::Contains<C, T>, "Condition contains column from table that is not in select request");
         data.addCondition(condition.data);
     }
 

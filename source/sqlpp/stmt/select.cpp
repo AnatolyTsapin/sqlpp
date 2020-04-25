@@ -14,21 +14,40 @@ namespace stmt
 SelectData::SelectData()
 {}
 
-SelectData::SelectData(const SelectData&) = default;
+SelectData::SelectData(const SelectData& other) :
+    tables(other.tables),
+    columns(other.columns),
+    binds(other.binds),
+    root(other.root->clone())
+{}
+
 SelectData::SelectData(SelectData&&) = default;
-SelectData& SelectData::operator=(const SelectData&) = default;
+
+SelectData& SelectData::operator=(const SelectData& other)
+{
+    if(this != &other)
+    {
+        tables = other.tables;
+        columns = other.columns;
+        binds = other.binds;
+        root = other.root->clone();
+    }
+    return *this;
+}
+
 SelectData& SelectData::operator=(SelectData&&) = default;
 
 void SelectData::addColumn(const string& tableName, const string& columnName)
 {
-    if(find(begin(tables), end(tables), tableName) == end(tables))
-        tables.push_back(tableName);
+    tables.insert(tableName);
     columns.push_back(tableName + "." + columnName);
 }
 
 void SelectData::addCondition(const condition::Data& cond)
 {
-    condition = cond;
+    tables.insert(cond.tables.begin(), cond.tables.end());
+    binds.insert(binds.end(), cond.binds.begin(), cond.binds.end());
+    root = cond.root->clone();
 }
 
 void SelectData::dump(ostream& stream) const
@@ -52,16 +71,18 @@ void SelectData::dump(ostream& stream) const
         stream << t;
     }
 
-    if(condition)
+    if(root)
     {
         stream << " WHERE ";
-        condition.dump(stream);
+        root->dump(stream);
     }
 }
 
 Result SelectData::execute(const Database& db) const
 {
-    return Result();
+    ostringstream ss;
+    dump(ss);
+    return binds.empty() ? db.execute(ss.str()) : db.execute(ss.str(), binds);
 }
 
 } /* namespace stmt */
