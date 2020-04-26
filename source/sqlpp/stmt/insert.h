@@ -71,14 +71,14 @@ private:
     using StatementD::StatementD;
 
     template<typename... V>
-    InsertRow(const InsertData& data, V&&... values) :
+    explicit InsertRow(const InsertData& data, V&&... values) :
         StatementD(data)
     {
         init(std::forward<V>(values)...);
     }
 
     template<typename... V>
-    InsertRow(InsertData&& data, V&&... values) :
+    explicit InsertRow(InsertData&& data, V&&... values) :
         StatementD(std::move(data))
     {
         init(std::forward<V>(values)...);
@@ -122,7 +122,7 @@ private:
     using StatementD::StatementD;
 
     template<typename... V>
-    InsertValues(const std::string& tableName, const Value<T, V>&... values) :
+    explicit InsertValues(const std::string& tableName, const Value<T, V>&... values) :
         StatementD(tableName)
     {
         addValues(values...);

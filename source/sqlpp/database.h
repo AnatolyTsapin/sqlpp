@@ -17,7 +17,7 @@ namespace sqlpp
 class Database
 {
 public:
-    Database(const std::string& filename);
+    explicit Database(const std::string& filename);
 
     sqlite3* handle() const
     {

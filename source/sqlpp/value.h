@@ -3,8 +3,6 @@
 
 #include <sqlpp/types.h>
 
-#include <optional>
-
 namespace sqlpp
 {
 

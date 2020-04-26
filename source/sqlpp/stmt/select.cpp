@@ -82,7 +82,7 @@ Result SelectData::execute(const Database& db) const
 {
     ostringstream ss;
     dump(ss);
-    return binds.empty() ? db.execute(ss.str()) : db.execute(ss.str(), binds);
+    return db.execute(ss.str(), binds);
 }
 
 } /* namespace stmt */

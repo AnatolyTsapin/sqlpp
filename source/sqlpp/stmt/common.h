@@ -49,7 +49,7 @@ protected:
     StatementD(StatementD&&) = default;
 
     template<typename... A>
-    StatementD(A&&... data) :
+    explicit StatementD(A&&... data) :
         data(std::forward<A>(data)...)
     {}
 
