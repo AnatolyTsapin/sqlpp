@@ -5,11 +5,8 @@
 #include <sqlpp/result.h>
 
 #include <string>
-#include <memory>
-#include <functional>
 
-extern "C"
-typedef struct sqlite3 sqlite3;
+struct sqlite3;
 
 namespace sqlpp
 {
@@ -18,18 +15,23 @@ class Database
 {
 public:
     explicit Database(const std::string& filename);
+    Database(const Database&) = delete;
+    Database(Database&& other);
+
+    ~Database();
+
+    Database& operator=(const Database&) = delete;
+    Database& operator=(Database&& other);
 
     sqlite3* handle() const
     {
-        return db.get();
+        return db;
     }
 
-    Result execute(const std::string& sql) const;
-    Result execute(const std::string& sql, const std::vector<Bind>& values) const;
+    Result execute(const std::string& sql, const std::vector<Bind>& values = {}) const;
 
 private:
-    using SQLite = std::unique_ptr<sqlite3, std::function<void(sqlite3*)>>;
-    SQLite db;
+    sqlite3* db = nullptr;
 };
 
 } /* namespace sqlpp */
