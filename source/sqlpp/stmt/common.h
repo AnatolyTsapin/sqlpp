@@ -8,7 +8,6 @@
 #include <string>
 #include <functional>
 #include <vector>
-#include <tuple>
 
 namespace sqlpp
 {

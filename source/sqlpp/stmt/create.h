@@ -63,7 +63,7 @@ private:
     {
         data.addColumnDesc(
             table.getColumnName(N),
-            TypeName<std::tuple_element_t<N, typename Table<T, V...>::Row>>::get());
+            TypeName<types::Get<N, typename Table<T, V...>::Row>>::get());
         if constexpr(N + 1 < Table<T, V...>::COLUMN_COUNT)
             insertColumns<N + 1>(table);
     }

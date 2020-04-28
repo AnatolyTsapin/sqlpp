@@ -8,7 +8,7 @@
 #include <vector>
 #include <functional>
 
-typedef struct sqlite3_stmt sqlite3_stmt;
+struct sqlite3_stmt;
 
 namespace sqlpp
 {

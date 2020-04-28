@@ -17,15 +17,15 @@ class Table
 public:
     using TableType = T;
 
-    using Row = std::tuple<typename Converter<V>::DbType...>;
+    using Row = types::MakeList<DbType<V>...>;
 
     template<size_t N>
-    using Field = std::tuple_element_t<N, Row>;
+    using Field = types::Get<N, Row>;
 
     template<size_t N>
-    using Column = sqlpp::Column<TableType, std::tuple_element_t<N, std::tuple<V...>>>;
+    using Column = sqlpp::Column<TableType, types::Get<N, types::MakeList<V...>>>;
 
-    static constexpr size_t COLUMN_COUNT = std::tuple_size_v<Row>;
+    static constexpr size_t COLUMN_COUNT = types::PackSize<V...>;
 
     Table(std::string name, std::array<std::string, COLUMN_COUNT> columnNames) :
         name(std::move(name)), columnNames(std::move(columnNames))

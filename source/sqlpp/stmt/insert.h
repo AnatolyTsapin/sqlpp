@@ -101,7 +101,7 @@ private:
     template<typename U>
     using ValType = typename Converter<U>::DbType;
     template<size_t N>
-    using ColType = std::tuple_element_t<N, typename T::Row>;
+    using ColType = types::Get<N, typename T::Row>;
 
     template<typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
@@ -142,7 +142,7 @@ private:
     void addValues(V&& value, VV&&... values)
     {
         data.addValue(value.getColumn().getName(), createBind(value.getValue()));
-        if constexpr(std::tuple_size_v<std::tuple<VV...>>)
+        if constexpr(types::PackSize<VV...>)
             addValues(std::forward<VV>(values)...);
     }
 };
