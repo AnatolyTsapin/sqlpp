@@ -50,6 +50,13 @@ void SelectData::addCondition(const condition::Data& cond)
     root = cond.root->clone();
 }
 
+void SelectData::addCondition(condition::Data&& cond)
+{
+    tables.insert(make_move_iterator(cond.tables.begin()), make_move_iterator(cond.tables.end()));
+    binds.insert(binds.end(), make_move_iterator(cond.binds.begin()), make_move_iterator(cond.binds.end()));
+    root = move(cond.root);
+}
+
 void SelectData::dump(ostream& stream) const
 {
     stream << "SELECT ";

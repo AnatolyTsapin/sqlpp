@@ -25,6 +25,7 @@ public:
     void addColumn(const std::string& tableName, const std::string& columnName);
 
     void addCondition(const condition::Data& cond);
+    void addCondition(condition::Data&& cond);
 
     void dump(std::ostream& stream) const;
     Result execute(const Database& db) const;
@@ -72,6 +73,18 @@ public:
         return SelectWhere<Tables, T>(std::move(data), condition);
     }
 
+    template<typename T>
+    SelectWhere<Tables, T> where(Condition<T>&& condition) const &
+    {
+        return SelectWhere<Tables, T>(data, std::move(condition));
+    }
+
+    template<typename T>
+    SelectWhere<Tables, T> where(Condition<T>&& condition) &&
+    {
+        return SelectWhere<Tables, T>(std::move(data), std::move(condition));
+    }
+
 private:
     template<typename U, typename... UU>
     void selectColumns(const U& c, const UU&... cc)
@@ -110,6 +123,18 @@ private:
         StatementD(std::move(data))
     {
         init(condition);
+    }
+
+    SelectWhere(const SelectData& data, Condition<C>&& condition) :
+        StatementD(data)
+    {
+        init(std::move(condition));
+    }
+
+    SelectWhere(SelectData&& data, Condition<C>&& condition) :
+        StatementD(std::move(data))
+    {
+        init(std::move(condition));
     }
 
     void init(const Condition<C>& condition)
