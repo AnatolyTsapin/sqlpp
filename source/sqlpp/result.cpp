@@ -9,6 +9,30 @@ using namespace std;
 namespace sqlpp
 {
 
+static void initValue(Integer& val, sqlite3_stmt* stmt, size_t i)
+{
+    val = sqlite3_column_int64(stmt, i);
+}
+
+static void initValue(Real& val, sqlite3_stmt* stmt, size_t i)
+{
+    val = sqlite3_column_double(stmt, i);
+}
+
+static void initValue(Text& val, sqlite3_stmt* stmt, size_t i)
+{
+    val = reinterpret_cast<const char*>(sqlite3_column_text(stmt, i));
+}
+
+static void initValue(Blob& val, sqlite3_stmt* stmt, size_t i)
+{
+    size_t size = sqlite3_column_bytes(stmt, i);
+    if(size == 0)
+        return;
+    auto ptr = static_cast<const byte*>(sqlite3_column_blob(stmt, i));
+    val.assign(ptr, ptr + size);
+}
+
 Result::Result(sqlite3_stmt* stmt) :
     stmt(stmt)
 {}
@@ -65,58 +89,24 @@ string Result::name(size_t i)
     return sqlite3_column_name(stmt, i);
 }
 
-optional<Integer> Result::asInteger(size_t i)
+template<typename R>
+optional<R> Result::as(size_t i)
 {
     if(i >= count())
         throw out_of_range("Incorrect column index");
 
-    optional<Integer> res;
-    if(sqlite3_column_type(stmt, i) != SQLITE_NULL)
-        res = sqlite3_column_int64(stmt, i);
-    return res;
-}
-std::optional<Real> Result::asReal(size_t i)
-{
-    if(i >= count())
-        throw out_of_range("Incorrect column index");
-
-    optional<Real> res;
-    if(sqlite3_column_type(stmt, i) != SQLITE_NULL)
-        res = sqlite3_column_double(stmt, i);
-    return res;
-}
-
-std::optional<Text> Result::asText(size_t i)
-{
-    if(i >= count())
-        throw out_of_range("Incorrect column index");
-
-    optional<Text> res;
-    if(sqlite3_column_type(stmt, i) != SQLITE_NULL)
-        res = Text(reinterpret_cast<const char*>(sqlite3_column_text(stmt, i)));
-    return res;
-}
-
-std::optional<Blob> Result::asBlob(size_t i)
-{
-    if(i >= count())
-        throw out_of_range("Incorrect column index");
-
-    optional<Blob> res;
+    optional<R> res;
     if(sqlite3_column_type(stmt, i) != SQLITE_NULL)
     {
-        size_t size = sqlite3_column_bytes(stmt, i);
-        if(size == 0)
-        {
-            res = Blob();
-        }
-        else
-        {
-            auto ptr = static_cast<const std::byte*>(sqlite3_column_blob(stmt, i));
-            res = Blob(ptr, ptr + size);
-        }
+        res.emplace();
+        initValue(res.value(), stmt, i);
     }
     return res;
 }
+
+template optional<Integer> Result::as(size_t i);
+template optional<Real> Result::as(size_t i);
+template optional<Text> Result::as(size_t i);
+template optional<Blob> Result::as(size_t i);
 
 } /* namespace sqlpp */

@@ -36,11 +36,6 @@ public:
     size_t count();
     std::string name(size_t i);
 
-    std::optional<Integer> asInteger(size_t i);
-    std::optional<Real> asReal(size_t i);
-    std::optional<Text> asText(size_t i);
-    std::optional<Blob> asBlob(size_t i);
-
     template<typename R>
     std::optional<R> as(size_t i);
 
@@ -49,29 +44,10 @@ private:
     int status = -1;
 };
 
-template<>
-inline std::optional<Integer> Result::as<Integer>(size_t i)
-{
-    return asInteger(i);
-}
-
-template<>
-inline std::optional<Real> Result::as<Real>(size_t i)
-{
-    return asReal(i);
-}
-
-template<>
-inline std::optional<Text> Result::as<Text>(size_t i)
-{
-    return asText(i);
-}
-
-template<>
-inline std::optional<Blob> Result::as<Blob>(size_t i)
-{
-    return asBlob(i);
-}
+extern template std::optional<Integer> Result::as(size_t i);
+extern template std::optional<Real> Result::as(size_t i);
+extern template std::optional<Text> Result::as(size_t i);
+extern template std::optional<Blob> Result::as(size_t i);
 
 } /* namespace sqlpp */
 
