@@ -37,7 +37,7 @@ private:
     condition::Node::Ptr root;
 };
 
-template<typename T, typename C>
+template<typename T, typename V, typename C>
 class SelectWhere;
 
 template<typename C, typename... CC>
@@ -52,7 +52,8 @@ private:
     }
 
 public:
-    using Tables = types::MakeList<TableType<C>, TableType<CC>...>;
+    using Tables = types::MakeSet<TableType<C>, TableType<CC>...>;
+    using Values = types::Concat<ValueType<C>, ValueType<CC>...>;
 
     static Select<C, CC...> make(const C& c, const CC&... cc)
     {
@@ -61,28 +62,33 @@ public:
 
     ~Select() override = default;
 
-    template<typename T>
-    SelectWhere<Tables, T> where(const Condition<T>& condition) const &
+    TypedResult<Values> executeT(const Database& db) const
     {
-        return SelectWhere<Tables, T>(data, condition);
+        return TypedResult<Values>(execute(db));
     }
 
     template<typename T>
-    SelectWhere<Tables, T> where(const Condition<T>& condition) &&
+    SelectWhere<Tables, Values, T> where(const Condition<T>& condition) const &
     {
-        return SelectWhere<Tables, T>(std::move(data), condition);
+        return SelectWhere<Tables, Values, T>(data, condition);
     }
 
     template<typename T>
-    SelectWhere<Tables, T> where(Condition<T>&& condition) const &
+    SelectWhere<Tables, Values, T> where(const Condition<T>& condition) &&
     {
-        return SelectWhere<Tables, T>(data, std::move(condition));
+        return SelectWhere<Tables, Values, T>(std::move(data), condition);
     }
 
     template<typename T>
-    SelectWhere<Tables, T> where(Condition<T>&& condition) &&
+    SelectWhere<Tables, Values, T> where(Condition<T>&& condition) const &
     {
-        return SelectWhere<Tables, T>(std::move(data), std::move(condition));
+        return SelectWhere<Tables, Values, T>(data, std::move(condition));
+    }
+
+    template<typename T>
+    SelectWhere<Tables, Values, T> where(Condition<T>&& condition) &&
+    {
+        return SelectWhere<Tables, Values, T>(std::move(data), std::move(condition));
     }
 
 private:
@@ -107,7 +113,7 @@ private:
     }
 };
 
-template<typename T, typename C>
+template<typename T, typename V, typename C>
 class SelectWhere final : public StatementD<SelectData>
 {
 private:
@@ -146,7 +152,15 @@ private:
     friend class Select;
 
 public:
+    using Tables = T;
+    using Values = V;
+
     ~SelectWhere() override = default;
+
+    TypedResult<Values> executeT(const Database& db) const
+    {
+        return TypedResult<Values>(execute(db));
+    }
 };
 
 } /* namespace stmt */

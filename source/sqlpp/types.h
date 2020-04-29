@@ -73,15 +73,15 @@ template<typename V>
 using DbType = typename Converter<V>::DbType;
 
 template<typename V>
-auto toDb(V&& value)
+auto toDb(const V& value)
 {
-    return Converter<V>::toDb(std::forward<V>(value));
+    return Converter<V>::toDb(value);
 }
 
-template<typename V>
-auto fromDb(V&& value)
+template<typename V, typename U>
+V fromDb(const U& value)
 {
-    return Converter<V>::fromDb(std::forward<V>(value));
+    return Converter<V>::fromDb(value);
 }
 
 template<typename V>
@@ -92,13 +92,13 @@ struct Converter<V, std::enable_if_t<
     std::is_same_v<remove_cvref_t<V>, Blob>>>
 {
     using DbType = remove_cvref_t<V>;
-    static DbType toDb(V&& value)
+    static DbType toDb(const DbType& value)
     {
-        return std::forward<V>(value);
+        return value;
     }
-    static V fromDb(DbType&& value)
+    static DbType fromDb(const DbType& value)
     {
-        return std::forward<V>(value);
+        return value;
     }
 };
 
@@ -107,7 +107,7 @@ struct Converter<V, std::enable_if_t<
     std::is_integral_v<remove_cvref_t<V>> && !std::is_same_v<remove_cvref_t<V>, Integer>>>
 {
     using DbType = Integer;
-    static Integer toDb(V&& value)
+    static Integer toDb(const V& value)
     {
         return static_cast<Integer>(value);
     }
@@ -122,7 +122,7 @@ struct Converter<V, std::enable_if_t<
     std::is_floating_point_v<remove_cvref_t<V>> && !std::is_same_v<remove_cvref_t<V>, Real>>>
 {
     using DbType = Real;
-    static Real toDb(V&& value)
+    static Real toDb(const V& value)
     {
         return static_cast<Real>(value);
     }
@@ -147,6 +147,9 @@ auto createBind(V&& value)
 
 template<typename T>
 using TableType = typename T::TableType;
+
+template<typename T>
+using ValueType = typename T::ValueType;
 
 namespace types
 {
@@ -256,6 +259,78 @@ struct SizeS<List<>>
 };
 
 template<typename U, typename L>
+struct InsertS;
+
+template<typename U, typename L>
+using Insert = typename InsertS<U, L>::Type;
+
+template<typename U, typename... T>
+struct InsertS<U, List<T...>>
+{
+    using Type = List<U, T...>;
+};
+
+template<typename U, typename L>
+struct InsertBackS;
+
+template<typename U, typename L>
+using InsertBack = typename InsertBackS<U, L>::Type;
+
+template<typename U, typename... T>
+struct InsertBackS<U, List<T...>>
+{
+    using Type = List<T..., U>;
+};
+
+template<typename... T>
+struct MakeListS;
+
+template<typename... T>
+using MakeList = typename MakeListS<T...>::Type;
+
+template<typename T, typename... TT>
+struct MakeListS<T, TT...>
+{
+    using Type = Insert<T, MakeList<TT...>>;
+};
+
+template<>
+struct MakeListS<>
+{
+    using Type = List<>;
+};
+
+template<typename... L>
+struct ConcatS;
+
+template<typename... L>
+using Concat = typename ConcatS<L...>::Type;
+
+template<typename L1, typename L2, typename... LL>
+struct ConcatS<L1, L2, LL...>
+{
+    using Type = Concat<Concat<L1, L2>, LL...>;
+};
+
+template<typename L, typename T, typename... TT>
+struct ConcatS<L, List<T, TT...>>
+{
+    using Type = Concat<InsertBack<T, L>, List<TT...>>;
+};
+
+template<typename L>
+struct ConcatS<L, List<>>
+{
+    using Type = L;
+};
+
+template<typename... T>
+struct ConcatS<List<T...>>
+{
+    using Type = List<T...>;
+};
+
+template<typename U, typename L>
 struct AddS;
 
 template<typename U, typename L>
@@ -268,37 +343,61 @@ struct AddS<U, List<T...>>
 };
 
 template<typename... T>
-struct MakeListS;
+struct MakeSetS;
 
 template<typename... T>
-using MakeList = typename MakeListS<T...>::Type;
+using MakeSet = typename MakeSetS<T...>::Type;
 
 template<typename T, typename... TT>
-struct MakeListS<T, TT...>
+struct MakeSetS<T, TT...>
 {
-    using Type = Add<T, MakeList<TT...>>;
+    using Type = Add<T, MakeSet<TT...>>;
 };
 
 template<>
-struct MakeListS<>
+struct MakeSetS<>
 {
     using Type = List<>;
 };
 
-template<typename L1, typename L2>
+template<typename... LL>
 struct MergeS;
 
-template<typename L1, typename L2>
-using Merge = typename MergeS<L1, L2>::Type;
+template<typename... LL>
+using Merge = typename MergeS<LL...>::Type;
 
-template<typename L1, typename T, typename... TT>
-struct MergeS<L1, List<T, TT...>>
+template<typename L1, typename L2>
+struct Merge2S;
+
+template<typename L1, typename L2>
+using Merge2 = typename Merge2S<L1, L2>::Type;
+
+template<typename L1, typename L2, typename... LL>
+struct MergeS<L1, L2, LL...>
 {
-    using Type = Add<T, Merge<L1, List<TT...>>>;
+    using Type = Merge<Merge2<L1, L2>, LL...>;
+};
+
+template<typename L1, typename L2>
+struct MergeS<L1, L2>
+{
+    using Type = Merge2<L1, L2>;
 };
 
 template<typename L1>
-struct MergeS<L1, List<>>
+struct MergeS<L1>
+{
+    using Type = L1;
+};
+
+template<typename L1, typename T, typename... TT>
+struct Merge2S<L1, List<T, TT...>>
+{
+    using Type = Add<T, Merge2<L1, List<TT...>>>;
+};
+
+template<typename L1>
+struct Merge2S<L1, List<>>
 {
     using Type = L1;
 };

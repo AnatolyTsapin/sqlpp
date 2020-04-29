@@ -11,13 +11,14 @@ namespace sqlpp
 {
 
 template<typename T, typename V>
-class Column : public Term<types::MakeList<T>, DbType<V>>
+class Column : public Term<types::MakeSet<T>, DbType<V>>
 {
 public:
     using TableType = T;
+    using ValueType = types::MakeList<V>;
 
     Column(const T& table, const std::string& name) :
-        Term<types::MakeList<T>, DbType<V>>(table.getName(), name),
+        Term<types::MakeSet<T>, DbType<V>>(table.getName(), name),
         table(table), name(name)
     {}
 

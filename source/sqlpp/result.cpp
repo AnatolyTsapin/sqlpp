@@ -40,6 +40,7 @@ Result::Result(sqlite3_stmt* stmt) :
 Result::Result(Result&& other)
 {
     swap(stmt, other.stmt);
+    swap(status, other.status);
 }
 
 Result::~Result()
@@ -53,10 +54,12 @@ Result& Result::operator=(Result&& other)
     if(this != &other)
     {
         swap(stmt, other.stmt);
+        swap(status, other.status);
         if(other.stmt)
         {
             sqlite3_finalize(other.stmt);
             other.stmt = nullptr;
+            other.status = NO_STATUS;
         }
     }
     return *this;

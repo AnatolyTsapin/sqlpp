@@ -16,6 +16,7 @@ class Table
 {
 public:
     using TableType = T;
+    using ValueType = types::MakeList<V...>;
 
     using Row = types::MakeList<DbType<V>...>;
 
@@ -23,7 +24,7 @@ public:
     using Field = types::Get<N, Row>;
 
     template<size_t N>
-    using Column = sqlpp::Column<TableType, types::Get<N, types::MakeList<V...>>>;
+    using Column = sqlpp::Column<TableType, types::Get<N, ValueType>>;
 
     static constexpr size_t COLUMN_COUNT = types::PackSize<V...>;
 

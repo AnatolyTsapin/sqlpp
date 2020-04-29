@@ -15,7 +15,7 @@ namespace stmt
 
 class SelectData;
 
-template<typename B, typename C>
+template<typename T, typename V, typename C>
 class SelectWhere;
 
 }
@@ -229,7 +229,7 @@ class Condition
     template<typename A>
     friend class Condition;
 
-    template<typename B, typename C>
+    template<typename B, typename C, typename D>
     friend class stmt::SelectWhere;
 
 public:
@@ -325,22 +325,22 @@ auto func(Term<T1, V>&& t1, Term<T2, V>&& t2) \
 template<typename T, typename V> \
 auto func(const Term<T, V>& t, V v) \
 { \
-    return Term<T, V>(condition::BinaryOperator::Op::op, t, Term<types::MakeList<>, V>(createBind(std::move(v)))); \
+    return Term<T, V>(condition::BinaryOperator::Op::op, t, Term<types::MakeSet<>, V>(createBind(std::move(v)))); \
 } \
 template<typename T, typename V> \
 auto func(Term<T, V>&& t, V v) \
 { \
-    return Term<T, V>(condition::BinaryOperator::Op::op, std::move(t), Term<types::MakeList<>, V>(createBind(std::move(v)))); \
+    return Term<T, V>(condition::BinaryOperator::Op::op, std::move(t), Term<types::MakeSet<>, V>(createBind(std::move(v)))); \
 } \
 template<typename T, typename V> \
 auto func(V v, const Term<T, V>& t) \
 { \
-    return Term<T, V>(condition::BinaryOperator::Op::op, Term<types::MakeList<>, V>(createBind(std::move(v))), t); \
+    return Term<T, V>(condition::BinaryOperator::Op::op, Term<types::MakeSet<>, V>(createBind(std::move(v))), t); \
 } \
 template<typename T, typename V> \
 auto func(V v, Term<T, V>&& t) \
 { \
-    return Term<T, V>(condition::BinaryOperator::Op::op, Term<types::MakeList<>, V>(createBind(std::move(v))), std::move(t)); \
+    return Term<T, V>(condition::BinaryOperator::Op::op, Term<types::MakeSet<>, V>(createBind(std::move(v))), std::move(t)); \
 }
 
 BIN_OP(operator*, MUL)
@@ -379,22 +379,22 @@ auto func(Term<T1, V>&& t1, Term<T2, V>&& t2) \
 template<typename T, typename V> \
 auto func(const Term<T, V>& t, V v) \
 { \
-    return Condition<T>(condition::BinaryOperator::Op::op, t, Term<types::MakeList<>, V>(createBind(std::move(v)))); \
+    return Condition<T>(condition::BinaryOperator::Op::op, t, Term<types::MakeSet<>, V>(createBind(std::move(v)))); \
 } \
 template<typename T, typename V> \
 auto func(Term<T, V>&& t, V v) \
 { \
-    return Condition<T>(condition::BinaryOperator::Op::op, std::move(t), Term<types::MakeList<>, V>(createBind(std::move(v)))); \
+    return Condition<T>(condition::BinaryOperator::Op::op, std::move(t), Term<types::MakeSet<>, V>(createBind(std::move(v)))); \
 } \
 template<typename T, typename V> \
 auto func(V v, const Term<T, V>& t) \
 { \
-    return Condition<T>(condition::BinaryOperator::Op::op, Term<types::MakeList<>, V>(createBind(std::move(v))), t); \
+    return Condition<T>(condition::BinaryOperator::Op::op, Term<types::MakeSet<>, V>(createBind(std::move(v))), t); \
 } \
 template<typename T, typename V> \
 auto func(V v, Term<T, V>&& t) \
 { \
-    return Condition<T>(condition::BinaryOperator::Op::op, Term<types::MakeList<>, V>(createBind(std::move(v))), std::move(t)); \
+    return Condition<T>(condition::BinaryOperator::Op::op, Term<types::MakeSet<>, V>(createBind(std::move(v))), std::move(t)); \
 }
 
 BIN_OP(operator<, LS)

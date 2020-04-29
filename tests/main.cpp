@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
 
     auto insStmt = insertInto(mt).values(10, "Hi"s);
     insStmt.execute(db);
+    insStmt.execute(db);
 
     auto insStmt2 = insertValues(yt.id <<= '0', yt.comment <<= "Just another table"s);
     insStmt2.execute(db);
@@ -79,16 +80,16 @@ int main(int argc, char* argv[])
     cout << selStmt << endl;
     selStmt.execute(db);
 
-    auto selStmt2 = select(yt);
-    auto res = selStmt2.execute(db);
+    auto selStmt2 = select(yt, mt.id);
+    auto res = selStmt2.executeT(db);
     for(size_t i = 0; i < res.count(); ++i)
         cout << "|" << res.name(i);
     cout << "|" << endl;
     while(res.hasData())
     {
-        cout << "|" << res.as<Integer>(0).value_or(0);
-        cout << "|" << res.as<Text>(1).value_or("NULL");
-        cout << "|" << res.as<Real>(2).value_or(0.0);
+        cout << "|" << res.get<0>().value_or('c');
+        cout << "|" << res.get<1>().value_or("NULL");
+        cout << "|" << res.get<2>().value_or(1.0);
         cout << "|" << endl;
         res.next();
     }
