@@ -8,17 +8,5 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/source
 )
 
-set(LAUNCHER_SRC
-    main.cpp
-)
-
-add_executable(launcher ${LAUNCHER_SRC})
-
-target_link_libraries(launcher
-    sqlpp_dyn sqlite3
-)
-
-add_test(
-    NAME Simple
-    COMMAND launcher
-)
+include(compile/compile.cmake)
+include(runtime/runtime.cmake)

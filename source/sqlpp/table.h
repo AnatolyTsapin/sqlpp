@@ -5,7 +5,6 @@
 #include <sqlpp/types.h>
 
 #include <string>
-#include <tuple>
 #include <array>
 
 namespace sqlpp

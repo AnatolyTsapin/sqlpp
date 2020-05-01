@@ -5,34 +5,6 @@
 using namespace std;
 using namespace sqlpp;
 
-struct Pack
-{
-    int id = 0;
-    char value = '0';
-};
-
-struct NotPack
-{
-    std::string val;
-};
-
-namespace sqlpp
-{
-template<>
-struct Converter<Pack>
-{
-    using DbType = Blob;
-    static Blob toDb(const Pack& value)
-    {
-        return Blob();
-    }
-    static Pack fromDb(const Blob& blob)
-    {
-        return Pack();
-    }
-};
-}
-
 class MyTable final : public Table<MyTable, int, string>
 {
 public:
