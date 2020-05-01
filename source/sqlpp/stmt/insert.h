@@ -98,16 +98,11 @@ public:
     ~InsertRow() override = default;
 
 private:
-    template<typename U>
-    using ValType = typename Converter<U>::DbType;
-    template<size_t N>
-    using ColType = types::Get<N, typename T::Row>;
-
     template<typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
     {
         constexpr size_t N = T::COLUMN_COUNT - types::PackSize<V, VV...>;
-        static_assert(std::is_same_v<ValType<V>, ColType<N>>,
+        static_assert(std::is_same_v<DbType<V>, typename types::Get<N, typename T::Row>>,
             "Value type does not match to column's one");
         data.addValue(createBind(std::forward<V>(value)));
         if constexpr(types::PackSize<VV...>)

@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef CHECK_SELECT_CONDITION
-    auto stmt = sqlpp::select(test).where(test.id == 0 && test.comment > test.value);
+    auto stmt = sqlpp::select(test).where(test.id == 0L && test.comment > test.value);
 #endif
 
     return 0;

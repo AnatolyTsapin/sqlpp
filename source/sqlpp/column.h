@@ -32,9 +32,9 @@ public:
         return name;
     }
 
-    Value<T, V> operator <<=(V&& value) const
+    auto operator <<=(const V& value) const
     {
-        return Value<T, V>(*this, toDb(std::forward<V>(value)));
+        return Value<T, V>(*this, toDb(value));
     }
 
 protected:

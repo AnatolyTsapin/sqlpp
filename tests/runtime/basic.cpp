@@ -29,6 +29,7 @@ public:
 };
 
 int main(int argc, char* argv[])
+try
 {
     Database db(":memory:");
     MyTable mt;
@@ -67,4 +68,14 @@ int main(int argc, char* argv[])
     }
 
     return 0;
+}
+catch(const exception& e)
+{
+    cerr << "Error: " << e.what() << endl;
+    return 1;
+}
+catch(...)
+{
+    cerr << "Unknown error" << endl;
+    return 2;
 }

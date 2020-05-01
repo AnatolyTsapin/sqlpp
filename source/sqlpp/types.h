@@ -70,12 +70,12 @@ template<typename V, typename E = void>
 struct Converter;
 
 template<typename V>
-using DbType = typename Converter<V>::DbType;
+using DbType = typename Converter<remove_cvref_t<V>>::DbType;
 
 template<typename V>
 auto toDb(const V& value)
 {
-    return Converter<V>::toDb(value);
+    return Converter<remove_cvref_t<V>>::toDb(value);
 }
 
 template<typename V, typename U>
