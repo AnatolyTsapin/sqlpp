@@ -95,6 +95,21 @@ try
         res.next();
     }
 
+    auto res2 = select(mt).where(mt.data == in[1]).executeT(db);
+    for(size_t i = 0; i < res2.count(); ++i)
+        cout << "|" << res2.name(i);
+    cout << "|" << endl;
+
+    while(res2.hasData())
+    {
+        cout << "|" << res2.get<0>().value();
+        cout << "|" << res2.get<1>().value();
+        cout << "|" << endl;
+        if(!(in[1] == res2.get<1>().value()))
+            throw runtime_error("Comparison error");
+        res2.next();
+    }
+
     return 0;
 }
 catch(const exception& e)
