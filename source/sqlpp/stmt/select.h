@@ -2,7 +2,7 @@
 #define SRC_SQLPP_STMT_SELECT_H_
 
 #include <sqlpp/stmt/common.h>
-#include <sqlpp/condition.h>
+#include <sqlpp/expr/condition.h>
 
 #include <unordered_set>
 
@@ -24,8 +24,8 @@ public:
 
     void addColumn(const std::string& tableName, const std::string& columnName);
 
-    void addCondition(const condition::Data& cond);
-    void addCondition(condition::Data&& cond);
+    void addCondition(const expr::Data& cond);
+    void addCondition(expr::Data&& cond);
 
     void dump(std::ostream& stream) const;
     Result execute(const Database& db) const;
@@ -34,7 +34,7 @@ private:
     std::unordered_set<std::string> tables;
     std::vector<std::string> columns;
     std::vector<Bind> binds;
-    condition::Node::Ptr root;
+    expr::Node::Ptr root;
 };
 
 template<typename T, typename V, typename C>
@@ -68,25 +68,25 @@ public:
     }
 
     template<typename T>
-    SelectWhere<Tables, Values, T> where(const Condition<T>& condition) const &
+    SelectWhere<Tables, Values, T> where(const expr::Condition<T>& condition) const &
     {
         return SelectWhere<Tables, Values, T>(data, condition);
     }
 
     template<typename T>
-    SelectWhere<Tables, Values, T> where(const Condition<T>& condition) &&
+    SelectWhere<Tables, Values, T> where(const expr::Condition<T>& condition) &&
     {
         return SelectWhere<Tables, Values, T>(std::move(data), condition);
     }
 
     template<typename T>
-    SelectWhere<Tables, Values, T> where(Condition<T>&& condition) const &
+    SelectWhere<Tables, Values, T> where(expr::Condition<T>&& condition) const &
     {
         return SelectWhere<Tables, Values, T>(data, std::move(condition));
     }
 
     template<typename T>
-    SelectWhere<Tables, Values, T> where(Condition<T>&& condition) &&
+    SelectWhere<Tables, Values, T> where(expr::Condition<T>&& condition) &&
     {
         return SelectWhere<Tables, Values, T>(std::move(data), std::move(condition));
     }
@@ -119,31 +119,31 @@ class SelectWhere final : public StatementD<SelectData>
 private:
     using StatementD::StatementD;
 
-    SelectWhere(const SelectData& data, const Condition<C>& condition) :
+    SelectWhere(const SelectData& data, const expr::Condition<C>& condition) :
         StatementD(data)
     {
         init(condition);
     }
 
-    SelectWhere(SelectData&& data, const Condition<C>& condition) :
+    SelectWhere(SelectData&& data, const expr::Condition<C>& condition) :
         StatementD(std::move(data))
     {
         init(condition);
     }
 
-    SelectWhere(const SelectData& data, Condition<C>&& condition) :
+    SelectWhere(const SelectData& data, expr::Condition<C>&& condition) :
         StatementD(data)
     {
         init(std::move(condition));
     }
 
-    SelectWhere(SelectData&& data, Condition<C>&& condition) :
+    SelectWhere(SelectData&& data, expr::Condition<C>&& condition) :
         StatementD(std::move(data))
     {
         init(std::move(condition));
     }
 
-    void init(const Condition<C>& condition)
+    void init(const expr::Condition<C>& condition)
     {
         data.addCondition(condition.data);
     }

@@ -1,4 +1,4 @@
-#include <sqlpp/condition.h>
+#include <sqlpp/expr/node.h>
 
 #include <stdexcept>
 #include <vector>
@@ -8,7 +8,7 @@ using namespace std;
 namespace sqlpp
 {
 
-namespace condition
+namespace expr
 {
 
 enum class Precedence : int
@@ -275,6 +275,6 @@ void Data::dump(ostream& stream) const
         root->dump(stream);
 }
 
-} /* namespace condition */
+} /* namespace expr */
 
 } /* namespace sqlpp */

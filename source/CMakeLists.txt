@@ -9,10 +9,10 @@ include_directories(
 )
 
 set(SQLPP_SRC
-    sqlpp/condition.cpp
     sqlpp/database.cpp
     sqlpp/result.cpp
     sqlpp/types.cpp
+    sqlpp/expr/node.cpp
     sqlpp/stmt/common.cpp
     sqlpp/stmt/create.cpp
     sqlpp/stmt/insert.cpp

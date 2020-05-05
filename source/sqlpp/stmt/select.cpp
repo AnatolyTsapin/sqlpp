@@ -43,14 +43,14 @@ void SelectData::addColumn(const string& tableName, const string& columnName)
     columns.push_back(tableName + "." + columnName);
 }
 
-void SelectData::addCondition(const condition::Data& cond)
+void SelectData::addCondition(const expr::Data& cond)
 {
     tables.insert(cond.tables.begin(), cond.tables.end());
     binds.insert(binds.end(), cond.binds.begin(), cond.binds.end());
     root = cond.root->clone();
 }
 
-void SelectData::addCondition(condition::Data&& cond)
+void SelectData::addCondition(expr::Data&& cond)
 {
     tables.insert(make_move_iterator(cond.tables.begin()), make_move_iterator(cond.tables.end()));
     binds.insert(binds.end(), make_move_iterator(cond.binds.begin()), make_move_iterator(cond.binds.end()));

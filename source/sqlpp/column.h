@@ -3,7 +3,7 @@
 
 #include <sqlpp/value.h>
 #include <sqlpp/types.h>
-#include <sqlpp/condition.h>
+#include <sqlpp/expr/term.h>
 
 #include <string>
 
@@ -11,14 +11,16 @@ namespace sqlpp
 {
 
 template<typename T, typename V>
-class Column : public Term<types::MakeSet<T>, DbType<V>>
+class Column : public expr::Term<types::MakeSet<T>, DbType<V>>
 {
+    using Base = expr::Term<types::MakeSet<T>, DbType<V>>;
+
 public:
     using TableType = T;
     using ValueType = types::MakeList<V>;
 
     Column(const T& table, const std::string& name) :
-        Term<types::MakeSet<T>, DbType<V>>(table.getName(), name),
+        Base(table.getName(), name),
         table(table), name(name)
     {}
 

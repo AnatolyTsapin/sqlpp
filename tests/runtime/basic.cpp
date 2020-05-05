@@ -49,7 +49,7 @@ try
     auto insStmt3 = insertInto(yt).values('1', "One more row"s, 1.0);
     insStmt3.execute(db);
 
-    auto selStmt = select(yt).where(0L == yt.id && (~(yt.id + 1L) == -mt.id || yt.comment != "Test"s));
+    auto selStmt = select(yt).where(0 == yt.id || yt.value == 1.2 && (~(yt.id + 1) == -mt.id || yt.comment != "Test"s));
     cout << selStmt << endl;
     selStmt.execute(db);
 
@@ -62,7 +62,7 @@ try
     {
         cout << "|" << res.get<0>().value_or('c');
         cout << "|" << res.get<1>().value_or("NULL");
-        cout << "|" << res.get<2>().value_or(1.0);
+        cout << "|" << res.get<2>().value_or(3.14);
         cout << "|" << endl;
         res.next();
     }
