@@ -23,4 +23,5 @@ endmacro(add_type_test)
 
 add_type_test(check_insert_type CHECK_INSERT_TYPE)
 add_type_test(check_insert_count CHECK_INSERT_COUNT)
+add_type_test(check_insert_two_tables CHECK_INSERT_TWO_TABLES)
 add_type_test(check_select_condition CHECK_SELECT_CONDITION)
