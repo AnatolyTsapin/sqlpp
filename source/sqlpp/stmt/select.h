@@ -106,8 +106,8 @@ private:
         data.addColumn(table.getName(), "*");
     }
 
-    template<typename T, typename V>
-    void selectColumn(const Column<T, V>& column)
+    template<typename T, typename V, size_t I>
+    void selectColumn(const Column<T, V, I>& column)
     {
         data.addColumn(column.getTable().getName(), column.getName());
     }

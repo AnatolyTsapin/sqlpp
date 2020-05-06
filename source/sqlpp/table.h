@@ -23,7 +23,7 @@ public:
     using Field = types::Get<N, Row>;
 
     template<size_t N>
-    using Column = sqlpp::Column<TableType, types::Get<N, ValueType>>;
+    using Column = sqlpp::Column<TableType, types::Get<N, ValueType>, N>;
 
     static constexpr size_t COLUMN_COUNT = types::PackSize<V...>;
 

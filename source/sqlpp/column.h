@@ -10,7 +10,7 @@
 namespace sqlpp
 {
 
-template<typename T, typename V>
+template<typename T, typename V, size_t I>
 class Column : public expr::Term<types::MakeSet<T>, DbType<V>>
 {
     using Base = expr::Term<types::MakeSet<T>, DbType<V>>;
@@ -36,7 +36,7 @@ public:
 
     auto operator <<=(const V& value) const
     {
-        return Value<T, V>(*this, toDb(value));
+        return Value<T, V, I>(*this, toDb(value));
     }
 
 protected:

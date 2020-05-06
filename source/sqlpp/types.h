@@ -402,6 +402,39 @@ struct Merge2S<L1, List<>>
     using Type = L1;
 };
 
+template<size_t... I>
+struct IntList;
+
+template<size_t I, size_t... II>
+struct IntList<I, II...>
+{
+    static constexpr bool contains(size_t j)
+    {
+        return j == I || IntList<II...>::contains(j);
+    }
+};
+
+template<>
+struct IntList<>
+{
+    static constexpr bool contains(size_t)
+    {
+        return false;
+    }
+};
+
+template<size_t J, typename L>
+struct AddIntListS;
+
+template<size_t J, typename L>
+using AddIntList = typename AddIntListS<J, L>::Type;
+
+template<size_t J, size_t... I>
+struct AddIntListS<J, IntList<I...>>
+{
+    using Type = IntList<J, I...>;
+};
+
 } /* namespace types */
 
 } /* namespace sqlpp */

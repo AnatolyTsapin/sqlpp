@@ -117,15 +117,15 @@ private:
     using StatementD::StatementD;
 
     template<typename... V>
-    explicit InsertValues(const std::string& tableName, const Value<T, V>&... values) :
+    explicit InsertValues(const std::string& tableName, V&&... values) :
         StatementD(tableName)
     {
-        addValues(values...);
+        addValues<types::IntList<>>(std::forward<V>(values)...);
     }
 
 public:
     template<typename V, typename... VV>
-    static InsertValues<T> make(const Value<T, V>& value, const Value<T, VV>&... values)
+    static InsertValues<T> make(V&& value, VV&&... values)
     {
         return InsertValues<T>(value.getColumn().getTable().getName(), value, values...);
     }
@@ -133,12 +133,14 @@ public:
     ~InsertValues() override = default;
 
 private:
-    template<typename V, typename... VV>
+    template<typename I, typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
     {
+        constexpr size_t INDEX = remove_cvref_t<V>::INDEX;
+        static_assert(!I::contains(INDEX), "Cannot insert the same value twice");
         data.addValue(value.getColumn().getName(), createBind(value.getValue()));
         if constexpr(types::PackSize<VV...>)
-            addValues(std::forward<VV>(values)...);
+            addValues<types::AddIntList<INDEX, I>>(std::forward<VV>(values)...);
     }
 };
 
@@ -151,9 +153,9 @@ inline stmt::Insert<Table<T, V...>> insertInto(const Table<T, V...>& table)
 }
 
 template<typename V, typename... VV>
-inline stmt::InsertValues<typename V::Table> insertValues(const V& value, const VV&... values)
+inline stmt::InsertValues<typename V::Table> insertValues(V&& value, VV&&... values)
 {
-    return stmt::InsertValues<typename V::Table>::make(value, values...);
+    return stmt::InsertValues<typename V::Table>::make(std::forward<V>(value), std::forward<VV>(values)...);
 }
 
 } /* namespace sqlpp */
