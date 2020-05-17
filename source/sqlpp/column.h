@@ -3,7 +3,7 @@
 
 #include <sqlpp/value.h>
 #include <sqlpp/types.h>
-#include <sqlpp/expr/term.h>
+#include <sqlpp/expr/expression.h>
 
 #include <string>
 
@@ -11,16 +11,15 @@ namespace sqlpp
 {
 
 template<typename T, typename V, size_t I>
-class Column : public expr::Term<types::MakeSet<T>, DbType<V>>
+class Column : public expr::Expression<types::MakeSet<T>, DbType<V>>
 {
-    using Base = expr::Term<types::MakeSet<T>, DbType<V>>;
-
 public:
     using TableType = T;
     using ValueType = types::MakeList<V>;
+    using ExpressionType = expr::Expression<types::MakeSet<T>, DbType<V>>;
 
     Column(const T& table, const std::string& name) :
-        Base(table.getName(), name),
+        ExpressionType(table.getName(), name),
         table(table), name(name)
     {}
 

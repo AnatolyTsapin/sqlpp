@@ -49,7 +49,9 @@ try
     auto insStmt3 = insertInto(yt).values('1', "One more row"s, 1.0);
     insStmt3.execute(db);
 
-    auto selStmt = select(yt).where(0 == yt.id || yt.value == 1.2 && (~(yt.id + 1) == -mt.id || yt.comment != "Test"s));
+    auto c = yt.id == 0;
+
+    auto selStmt = select(yt).where(0 == yt.id && c || yt.value == 1.2 && (~(yt.id + 1) == -mt.id || yt.comment != "Test"s));
     cout << selStmt << endl;
     selStmt.execute(db);
 
