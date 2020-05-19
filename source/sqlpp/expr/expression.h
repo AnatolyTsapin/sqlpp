@@ -6,6 +6,14 @@
 namespace sqlpp
 {
 
+namespace stmt
+{
+
+template<typename T>
+class Update;
+
+}
+
 namespace expr
 {
 
@@ -14,6 +22,9 @@ class Expression
 {
     template<typename A, typename B>
     friend class Expression;
+
+    template<typename A>
+    friend class stmt::Update;
 
 protected:
     Expression(const std::string& table, const std::string& field) :
@@ -64,7 +75,7 @@ public:
 };
 
 template<template<typename...> typename S, typename... E>
-using ExprResult = typename S<typename remove_cvref_t<E>::ExpressionType...>::Result;
+using ExprTables = typename S<typename remove_cvref_t<E>::ExpressionType...>::Tables;
 
 template<template<typename...> typename S, typename... E>
 using ExprTerm = typename S<typename remove_cvref_t<E>::ExpressionType...>::Term;
@@ -72,13 +83,16 @@ using ExprTerm = typename S<typename remove_cvref_t<E>::ExpressionType...>::Term
 template<template<typename...> typename S, typename... E>
 using LiteralTerm = Literal<ExprTerm<S, E...>>;
 
+template<template<typename...> typename S, typename... E>
+using ExprResult = Expression<ExprTables<S, E...>, ExprTerm<S, E...>>;
+
 template<typename... E>
 struct IntExpr;
 
 template<typename... T>
 struct IntExpr<Expression<T, Integer>...>
 {
-    using Result = Expression<types::Merge<T...>, Integer>;
+    using Tables = types::Merge<T...>;
     using Term = Integer;
 };
 
@@ -88,7 +102,7 @@ struct TxtExpr;
 template<typename... T>
 struct TxtExpr<Expression<T, Text>...>
 {
-    using Result = Expression<types::Merge<T...>, Text>;
+    using Tables = types::Merge<T...>;
     using Term = Text;
 };
 
@@ -98,15 +112,25 @@ struct NumExpr;
 template<typename... T>
 struct NumExpr<Expression<T, Integer>...>
 {
-    using Result = Expression<types::Merge<T...>, Integer>;
+    using Tables = types::Merge<T...>;
     using Term = Integer;
 };
 
 template<typename... T>
 struct NumExpr<Expression<T, Real>...>
 {
-    using Result = Expression<types::Merge<T...>, Real>;
+    using Tables = types::Merge<T...>;
     using Term = Real;
+};
+
+template<typename... E>
+struct AnyExpr;
+
+template<typename V, typename... T>
+struct AnyExpr<Expression<T, V>...>
+{
+    using Tables = types::Merge<T...>;
+    using Term = V;
 };
 
 template<typename E>

@@ -15,8 +15,7 @@ namespace stmt
 
 class SelectData;
 
-template<typename T, typename V, typename C>
-class SelectWhere;
+class UpdateData;
 
 }
 
@@ -174,6 +173,7 @@ private:
     std::vector<Bind> binds;
 
     friend class stmt::SelectData;
+    friend class stmt::UpdateData;
 };
 
 } /* namespace expr */

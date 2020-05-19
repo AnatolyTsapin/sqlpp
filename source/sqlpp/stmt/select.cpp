@@ -17,9 +17,11 @@ SelectData::SelectData()
 SelectData::SelectData(const SelectData& other) :
     tables(other.tables),
     columns(other.columns),
-    binds(other.binds),
-    root(other.root->clone())
-{}
+    binds(other.binds)
+{
+    if(other.root)
+        root = other.root->clone();
+}
 
 SelectData::SelectData(SelectData&&) = default;
 
@@ -30,7 +32,8 @@ SelectData& SelectData::operator=(const SelectData& other)
         tables = other.tables;
         columns = other.columns;
         binds = other.binds;
-        root = other.root->clone();
+        if(other.root)
+            root = other.root->clone();
     }
     return *this;
 }
@@ -45,9 +48,7 @@ void SelectData::addColumn(const string& tableName, const string& columnName)
 
 void SelectData::addCondition(const expr::Data& cond)
 {
-    tables.insert(cond.tables.begin(), cond.tables.end());
-    binds.insert(binds.end(), cond.binds.begin(), cond.binds.end());
-    root = cond.root->clone();
+    addCondition(expr::Data(cond));
 }
 
 void SelectData::addCondition(expr::Data&& cond)

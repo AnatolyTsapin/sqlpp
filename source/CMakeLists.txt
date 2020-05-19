@@ -17,6 +17,7 @@ set(SQLPP_SRC
     sqlpp/stmt/create.cpp
     sqlpp/stmt/insert.cpp
     sqlpp/stmt/select.cpp
+    sqlpp/stmt/update.cpp
 )
 
 add_library(sqlpp_st ${SQLPP_SRC})

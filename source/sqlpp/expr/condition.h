@@ -6,6 +6,17 @@
 namespace sqlpp
 {
 
+namespace stmt
+{
+
+template<typename T, typename V, typename C>
+class SelectWhere;
+
+template<typename T, typename C>
+class UpdateWhere;
+
+}
+
 namespace expr
 {
 
@@ -17,6 +28,9 @@ class Condition : public Expression<T, bool>
 
     template<typename B, typename C, typename D>
     friend class stmt::SelectWhere;
+
+    template<typename E, typename F>
+    friend class stmt::UpdateWhere;
 
 public:
     using ExpressionType = Condition<T>;
@@ -33,22 +47,11 @@ struct BoolExpr;
 template<typename... T>
 struct BoolExpr<Condition<T>...>
 {
-    using CondResult = Condition<types::Merge<T...>>;
-};
-
-template<typename... E>
-struct AnyExpr;
-
-template<typename V, typename... T>
-struct AnyExpr<Expression<T, V>...>
-{
-    using CondResult = Condition<types::Merge<T...>>;
-    using Result = Expression<types::Merge<T...>, V>;
-    using Term = V;
+    using Tables = types::Merge<T...>;
 };
 
 template<template<typename...> typename S, typename... E>
-using CondResult = typename S<typename remove_cvref_t<E>::ExpressionType...>::CondResult;
+using CondResult = Condition<ExprTables<S, E...>>;
 
 template<typename C>
 CondResult<BoolExpr, C> operator!(C&& c)

@@ -116,6 +116,9 @@ private:
 template<typename T, typename V, typename C>
 class SelectWhere final : public StatementD<SelectData>
 {
+    template<typename U, typename... UU>
+    friend class Select;
+
 private:
     using StatementD::StatementD;
 
@@ -147,9 +150,6 @@ private:
     {
         data.addCondition(condition.data);
     }
-
-    template<typename U, typename... UU>
-    friend class Select;
 
 public:
     using Tables = T;
