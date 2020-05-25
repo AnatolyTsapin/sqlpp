@@ -61,10 +61,17 @@ public:
 
     ~Update() override = default;
 
+
     template<typename C>
-    UpdateWhere<T, C> where(const expr::Condition<C>& condition) const
+    UpdateWhere<T, expr::ExprTables<expr::BoolExpr, C>> where(C&& condition) const &
     {
-        return UpdateWhere<T, C>(data, condition);
+        return UpdateWhere<T, expr::ExprTables<expr::BoolExpr, C>>(UpdateData(data), std::forward<C>(condition));
+    }
+
+    template<typename C>
+    UpdateWhere<T, expr::ExprTables<expr::BoolExpr, C>> where(C&& condition) &&
+    {
+        return UpdateWhere<T, expr::ExprTables<expr::BoolExpr, C>>(std::move(data), std::forward<C>(condition));
     }
 
 private:
@@ -87,10 +94,10 @@ class UpdateWhere final : public StatementD<UpdateData>
 private:
     using StatementD::StatementD;
 
-    UpdateWhere(const UpdateData& data, const expr::Condition<C>& condition) :
-        StatementD(data)
+    UpdateWhere(UpdateData&& data, expr::Condition<C>&& condition) :
+        StatementD(std::move(data))
     {
-        this->data.addCondition(condition.data);
+        this->data.addCondition(std::move(condition.data));
     }
 
 public:
