@@ -73,6 +73,9 @@ try
         res.next();
     }
 
+    auto selStmt3 = select(mt).where(yt.id == 0).groupBy(mt.id - 1, mt.text).orderBy(mt.id, yt.comment).limit(10);
+    cout << selStmt3 << endl;
+
     return 0;
 }
 catch(const exception& e)

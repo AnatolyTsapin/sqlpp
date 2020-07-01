@@ -9,6 +9,12 @@ namespace sqlpp
 namespace stmt
 {
 
+template<typename T, typename V>
+class SelectWhere;
+
+template<typename T, typename V>
+class SelectGroupBy;
+
 template<typename T>
 class Update;
 
@@ -22,6 +28,12 @@ class Expression
 {
     template<typename A, typename B>
     friend class Expression;
+
+    template<typename A, typename B>
+    friend class stmt::SelectWhere;
+
+    template<typename A, typename B>
+    friend class stmt::SelectGroupBy;
 
     template<typename A>
     friend class stmt::Update;
@@ -66,11 +78,9 @@ template<typename V>
 class Literal : public Expression<types::List<>, V>
 {
 public:
-    using ExpressionType = Expression<types::List<>, V>;
-
     template<typename U, std::enable_if_t<std::is_same_v<V, DbType<U>>, int> = 0>
     Literal(const U& value) :
-        ExpressionType(createBind(value))
+        Expression<types::List<>, V>(createBind(value))
     {}
 };
 
@@ -131,6 +141,21 @@ struct AnyExpr<Expression<T, V>...>
 {
     using Tables = types::Merge<T...>;
     using Term = V;
+};
+
+template<typename... E>
+struct AllExpr;
+
+template<typename T, typename V, typename... E>
+struct AllExpr<Expression<T, V>, E...>
+{
+    using Tables = types::Merge<T, typename AllExpr<E...>::Tables>;
+};
+
+template<typename T, typename V>
+struct AllExpr<Expression<T, V>>
+{
+    using Tables = T;
 };
 
 template<typename E>

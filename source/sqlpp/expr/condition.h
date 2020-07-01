@@ -9,8 +9,11 @@ namespace sqlpp
 namespace stmt
 {
 
+template<typename T, typename V>
+class Select;
+
 template<typename T, typename V, typename C>
-class SelectWhere;
+class SelectWher;
 
 template<typename T, typename C>
 class UpdateWhere;
@@ -26,15 +29,16 @@ class Condition : public Expression<T, bool>
     template<typename A>
     friend class Condition;
 
-    template<typename B, typename C, typename D>
-    friend class stmt::SelectWhere;
+    template<typename A, typename B>
+    friend class stmt::Select;
 
-    template<typename E, typename F>
+    template<typename A, typename B, typename C>
+    friend class stmt::SelectWher;
+
+    template<typename A, typename B>
     friend class stmt::UpdateWhere;
 
 public:
-    using ExpressionType = Condition<T>;
-
     using Expression<T, bool>::Expression;
 
     Condition& operator=(const Condition&) = default;
@@ -45,7 +49,7 @@ template<typename... C>
 struct BoolExpr;
 
 template<typename... T>
-struct BoolExpr<Condition<T>...>
+struct BoolExpr<Expression<T, bool>...>
 {
     using Tables = types::Merge<T...>;
 };

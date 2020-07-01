@@ -27,148 +27,215 @@ public:
     void addCondition(const expr::Data& cond);
     void addCondition(expr::Data&& cond);
 
+    void addGroupBy(const expr::Data& group);
+    void addGroupBy(expr::Data&& group);
+
+    void addOrderBy(const expr::Data& group);
+    void addOrderBy(expr::Data&& group);
+
+    void addLimit(size_t limit);
+
     void dump(std::ostream& stream) const;
     Result execute(const Database& db) const;
 
 private:
-    std::unordered_set<std::string> tables;
     std::vector<std::string> columns;
+    std::unordered_set<std::string> tables;
+    expr::Node::Ptr where;
+    std::vector<expr::Node::Ptr> groupBy;
+    std::vector<expr::Node::Ptr> orderBy;
+    std::optional<size_t> limit;
     std::vector<Bind> binds;
-    expr::Node::Ptr root;
 };
 
-template<typename T, typename V, typename C>
-class SelectWhere;
-
-template<typename C, typename... CC>
-class Select final : public StatementD<SelectData>
+template<typename T, typename V>
+class SelectLimit : public StatementD<SelectData>
 {
-private:
-    using StatementD::StatementD;
-
-    explicit Select(const C& c, const CC&... cc)
-    {
-        selectColumns(c, cc...);
-    }
-
-public:
-    using Tables = types::MakeSet<TableType<C>, TableType<CC>...>;
-    using Values = types::Concat<ValueType<C>, ValueType<CC>...>;
-
-    static Select<C, CC...> make(const C& c, const CC&... cc)
-    {
-        return Select<C, CC...>(c, cc...);
-    }
-
-    ~Select() override = default;
-
-    TypedResult<Values> executeT(const Database& db) const
-    {
-        return TypedResult<Values>(execute(db));
-    }
-
-    template<typename T>
-    SelectWhere<Tables, Values, T> where(const expr::Condition<T>& condition) const &
-    {
-        return SelectWhere<Tables, Values, T>(data, condition);
-    }
-
-    template<typename T>
-    SelectWhere<Tables, Values, T> where(const expr::Condition<T>& condition) &&
-    {
-        return SelectWhere<Tables, Values, T>(std::move(data), condition);
-    }
-
-    template<typename T>
-    SelectWhere<Tables, Values, T> where(expr::Condition<T>&& condition) const &
-    {
-        return SelectWhere<Tables, Values, T>(data, std::move(condition));
-    }
-
-    template<typename T>
-    SelectWhere<Tables, Values, T> where(expr::Condition<T>&& condition) &&
-    {
-        return SelectWhere<Tables, Values, T>(std::move(data), std::move(condition));
-    }
-
-private:
-    template<typename U, typename... UU>
-    void selectColumns(const U& c, const UU&... cc)
-    {
-        selectColumn(c);
-        if constexpr(types::PackSize<UU...>)
-            selectColumns(cc...);
-    }
-
-    template<typename T, typename... V>
-    void selectColumn(const Table<T, V...>& table)
-    {
-        data.addColumn(table.getName(), "*");
-    }
-
-    template<typename T, typename V, size_t I>
-    void selectColumn(const Column<T, V, I>& column)
-    {
-        data.addColumn(column.getTable().getName(), column.getName());
-    }
-};
-
-template<typename T, typename V, typename C>
-class SelectWhere final : public StatementD<SelectData>
-{
-    template<typename U, typename... UU>
-    friend class Select;
-
-private:
-    using StatementD::StatementD;
-
-    SelectWhere(const SelectData& data, const expr::Condition<C>& condition) :
-        StatementD(data)
-    {
-        init(condition);
-    }
-
-    SelectWhere(SelectData&& data, const expr::Condition<C>& condition) :
-        StatementD(std::move(data))
-    {
-        init(condition);
-    }
-
-    SelectWhere(const SelectData& data, expr::Condition<C>&& condition) :
-        StatementD(data)
-    {
-        init(std::move(condition));
-    }
-
-    SelectWhere(SelectData&& data, expr::Condition<C>&& condition) :
-        StatementD(std::move(data))
-    {
-        init(std::move(condition));
-    }
-
-    void init(const expr::Condition<C>& condition)
-    {
-        data.addCondition(condition.data);
-    }
-
 public:
     using Tables = T;
     using Values = V;
 
-    ~SelectWhere() override = default;
+    using StatementD<SelectData>::StatementD;
+
+    ~SelectLimit() override = default;
 
     TypedResult<Values> executeT(const Database& db) const
     {
         return TypedResult<Values>(execute(db));
+    }
+};
+
+template<typename T, typename V>
+class SelectOrderBy : public SelectLimit<T, V>
+{
+public:
+    using SelectLimit<T, V>::SelectLimit;
+
+    ~SelectOrderBy() override = default;
+
+    SelectLimit<T, V> limit(size_t l) const &
+    {
+        return addLimit(SelectData(this->data), l);
+    }
+
+    SelectLimit<T, V> limit(size_t l) &&
+    {
+        return addLimit(std::move(this->data), l);
+    }
+
+private:
+    static SelectLimit<T, V> addLimit(SelectData&& data, size_t l)
+    {
+        data.addLimit(l);
+        return SelectLimit<T, V>(std::move(data));
+    }
+};
+
+template<typename T, typename V>
+class SelectGroupBy : public SelectOrderBy<T, V>
+{
+    template<typename... E>
+    using SelectOrderByType = SelectOrderBy<types::Merge<T, expr::ExprTables<expr::AllExpr, E...>>, V>;
+public:
+    using SelectOrderBy<T, V>::SelectOrderBy;
+
+    template<typename E, typename... EE>
+    SelectOrderByType<E, EE...> orderBy(E&& expression, EE&&... expressions) const &
+    {
+        return addGroupBy(SelectData(this->data), std::forward<E>(expression), std::forward<EE>(expressions)...);
+    }
+
+    template<typename E, typename... EE>
+    SelectOrderByType<E, EE...> orderBy(E&& expression, EE&&... expressions) &&
+    {
+        return addOrderBy(std::move(this->data), std::forward<E>(expression), std::forward<EE>(expressions)...);
+    }
+
+private:
+    template<typename E, typename... EE>
+    static SelectOrderByType<E, EE...> addOrderBy(SelectData&& data, E&& expression, EE&&... expressions)
+    {
+        addOrder(data, std::forward<E>(expression));
+        if constexpr(types::PackSize<EE...> == 0)
+            return SelectOrderByType<E, EE...>(std::move(data));
+        else
+            return addOrderBy(std::move(data), std::forward<EE>(expressions)...);
+    }
+
+    template<typename E>
+    static void addOrder(SelectData& data, E&& expression)
+    {
+        data.addOrderBy(std::forward<E>(expression).data);
+    }
+};
+
+template<typename T, typename V>
+class SelectWhere : public SelectGroupBy<T, V>
+{
+    template<typename... E>
+    using SelectGroupByType = SelectGroupBy<types::Merge<T, expr::ExprTables<expr::AllExpr, E...>>, V>;
+public:
+    using SelectGroupBy<T, V>::SelectGroupBy;
+
+    ~SelectWhere() override = default;
+
+    template<typename E, typename... EE>
+    SelectGroupByType<E, EE...> groupBy(E&& expression, EE&&... expressions) const &
+    {
+        return addGroupBy(SelectData(this->data), std::forward<E>(expression), std::forward<EE>(expressions)...);
+    }
+
+    template<typename E, typename... EE>
+    SelectGroupByType<E, EE...> groupBy(E&& expression, EE&&... expressions) &&
+    {
+        return addGroupBy(std::move(this->data), std::forward<E>(expression), std::forward<EE>(expressions)...);
+    }
+
+private:
+    template<typename E, typename... EE>
+    static SelectGroupByType<E, EE...> addGroupBy(SelectData&& data, E&& expression, EE&&... expressions)
+    {
+        addGroup(data, std::forward<E>(expression));
+        if constexpr(types::PackSize<EE...> == 0)
+            return SelectGroupByType<E, EE...>(std::move(data));
+        else
+            return addGroupBy(std::move(data), std::forward<EE>(expressions)...);
+    }
+
+    template<typename E>
+    static void addGroup(SelectData& data, E&& expression)
+    {
+        data.addGroupBy(std::forward<E>(expression).data);
+    }
+};
+
+template<typename T, typename V>
+class Select : public SelectWhere<T, V>
+{
+    template<typename C>
+    using SelectWhereType = SelectWhere<types::Merge<T, expr::ExprTables<expr::BoolExpr, C>>, V>;
+public:
+    using SelectWhere<T, V>::SelectWhere;
+
+    ~Select() override = default;
+
+    template<typename R, typename... RR>
+    static Select<T, V> make(R&& result, RR&&... results)
+    {
+        Select<T, V> ret;
+        ret.addResults(std::forward<R>(result), std::forward<RR>(results)...);
+        return ret;
+    }
+
+    template<typename C>
+    SelectWhereType<C> where(C&& condition) const &
+    {
+        return addWhere(SelectData(this->data), std::forward<C>(condition));
+    }
+
+    template<typename C>
+    SelectWhereType<C> where(C&& condition) &&
+    {
+        return addWhere(std::move(this->data), std::forward<C>(condition));
+    }
+
+private:
+    template<typename R, typename... RR>
+    void addResults(R&& result, RR&&... results)
+    {
+        addResult(std::forward<R>(result));
+        if constexpr(types::PackSize<RR...>)
+            addResults(std::forward<RR>(results)...);
+    }
+
+    template<typename B, typename... U>
+    void addResult(const Table<B, U...>& table)
+    {
+        this->data.addColumn(table.getName(), "*");
+    }
+
+    template<typename B, typename U, size_t I>
+    void addResult(const Column<B, U, I>& column)
+    {
+        this->data.addColumn(column.getTable().getName(), column.getName());
+    }
+
+    template<typename C>
+    static SelectWhereType<C> addWhere(SelectData&& data, C&& condition)
+    {
+        data.addCondition(std::forward<C>(condition).data);
+        return SelectWhereType<C>(std::move(data));
     }
 };
 
 } /* namespace stmt */
 
-template<typename C, typename... CC>
-inline stmt::Select<C, CC...> select(const C& column, const CC&... columns)
+template<typename R, typename... RR>
+inline auto select(R&& result, RR&&... results)
 {
-    return stmt::Select<C, CC...>::make(column, columns...);
+    using Tables = types::MakeSet<TableType<remove_cvref_t<R>>, TableType<remove_cvref_t<RR>>...>;
+    using Values = types::Concat<ValueType<remove_cvref_t<R>>, ValueType<remove_cvref_t<RR>>...>;
+    return stmt::Select<Tables, Values>::make(std::forward<R>(result), std::forward<RR>(results)...);
 }
 
 } /* namespace sqlpp */

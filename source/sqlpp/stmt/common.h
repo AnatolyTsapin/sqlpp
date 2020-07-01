@@ -43,7 +43,7 @@ namespace stmt
 template<typename D>
 class StatementD : public Statement
 {
-protected:
+public:
     StatementD(const StatementD&) = default;
     StatementD(StatementD&&) = default;
 
@@ -52,7 +52,6 @@ protected:
         data(std::forward<A>(data)...)
     {}
 
-public:
     ~StatementD() override = default;
 
     StatementD& operator=(const StatementD&) = default;
