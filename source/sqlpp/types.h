@@ -13,9 +13,6 @@ struct sqlite3_stmt;
 namespace sqlpp
 {
 
-template<typename V>
-using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<V>>;
-
 using Integer = int64_t;
 using Real = double;
 using Text = std::string;
@@ -70,12 +67,12 @@ template<typename V, typename E = void>
 struct Converter;
 
 template<typename V>
-using DbType = typename Converter<remove_cvref_t<V>>::DbType;
+using DbType = typename Converter<std::remove_cvref_t<V>>::DbType;
 
 template<typename V>
 auto toDb(const V& value)
 {
-    return Converter<remove_cvref_t<V>>::toDb(value);
+    return Converter<std::remove_cvref_t<V>>::toDb(value);
 }
 
 template<typename V, typename U>
@@ -86,12 +83,12 @@ V fromDb(const U& value)
 
 template<typename V>
 struct Converter<V, std::enable_if_t<
-    std::is_same_v<remove_cvref_t<V>, Integer> ||
-    std::is_same_v<remove_cvref_t<V>, Real> ||
-    std::is_same_v<remove_cvref_t<V>, Text> ||
-    std::is_same_v<remove_cvref_t<V>, Blob>>>
+    std::is_same_v<std::remove_cvref_t<V>, Integer> ||
+    std::is_same_v<std::remove_cvref_t<V>, Real> ||
+    std::is_same_v<std::remove_cvref_t<V>, Text> ||
+    std::is_same_v<std::remove_cvref_t<V>, Blob>>>
 {
-    using DbType = remove_cvref_t<V>;
+    using DbType = std::remove_cvref_t<V>;
     static DbType toDb(const DbType& value)
     {
         return value;
@@ -104,7 +101,7 @@ struct Converter<V, std::enable_if_t<
 
 template<typename V>
 struct Converter<V, std::enable_if_t<
-    std::is_integral_v<remove_cvref_t<V>> && !std::is_same_v<remove_cvref_t<V>, Integer>>>
+    std::is_integral_v<std::remove_cvref_t<V>> && !std::is_same_v<std::remove_cvref_t<V>, Integer>>>
 {
     using DbType = Integer;
     static Integer toDb(const V& value)
@@ -119,7 +116,7 @@ struct Converter<V, std::enable_if_t<
 
 template<typename V>
 struct Converter<V, std::enable_if_t<
-    std::is_floating_point_v<remove_cvref_t<V>> && !std::is_same_v<remove_cvref_t<V>, Real>>>
+    std::is_floating_point_v<std::remove_cvref_t<V>> && !std::is_same_v<std::remove_cvref_t<V>, Real>>>
 {
     using DbType = Real;
     static Real toDb(const V& value)

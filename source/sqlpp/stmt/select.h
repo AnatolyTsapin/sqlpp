@@ -233,8 +233,8 @@ private:
 template<typename R, typename... RR>
 inline auto select(R&& result, RR&&... results)
 {
-    using Tables = types::MakeSet<TableType<remove_cvref_t<R>>, TableType<remove_cvref_t<RR>>...>;
-    using Values = types::Concat<ValueType<remove_cvref_t<R>>, ValueType<remove_cvref_t<RR>>...>;
+    using Tables = types::MakeSet<TableType<std::remove_cvref_t<R>>, TableType<std::remove_cvref_t<RR>>...>;
+    using Values = types::Concat<ValueType<std::remove_cvref_t<R>>, ValueType<std::remove_cvref_t<RR>>...>;
     return stmt::Select<Tables, Values>::make(std::forward<R>(result), std::forward<RR>(results)...);
 }
 

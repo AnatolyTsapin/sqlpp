@@ -78,7 +78,7 @@ private:
     template<typename I, typename A, typename... AA>
     void addAssignments(A&& a, AA&&... aa)
     {
-        constexpr size_t INDEX = remove_cvref_t<A>::INDEX;
+        constexpr size_t INDEX = std::remove_cvref_t<A>::INDEX;
         static_assert(!I::contains(INDEX), "Cannot update the same value twice");
         data.addAssignment(a.getColumn().getName(), std::forward<A>(a).getExpr().data);
         if constexpr(types::PackSize<AA...>)

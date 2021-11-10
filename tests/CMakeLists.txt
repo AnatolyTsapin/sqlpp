@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 
 project(Tests)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -g")
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/source

@@ -85,10 +85,10 @@ public:
 };
 
 template<template<typename...> typename S, typename... E>
-using ExprTables = typename S<typename remove_cvref_t<E>::ExpressionType...>::Tables;
+using ExprTables = typename S<typename std::remove_cvref_t<E>::ExpressionType...>::Tables;
 
 template<template<typename...> typename S, typename... E>
-using ExprTerm = typename S<typename remove_cvref_t<E>::ExpressionType...>::Term;
+using ExprTerm = typename S<typename std::remove_cvref_t<E>::ExpressionType...>::Term;
 
 template<template<typename...> typename S, typename... E>
 using LiteralTerm = Literal<ExprTerm<S, E...>>;

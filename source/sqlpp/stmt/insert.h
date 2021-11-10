@@ -136,7 +136,7 @@ private:
     template<typename I, typename V, typename... VV>
     void addValues(V&& value, VV&&... values)
     {
-        constexpr size_t INDEX = remove_cvref_t<V>::INDEX;
+        constexpr size_t INDEX = std::remove_cvref_t<V>::INDEX;
         static_assert(!I::contains(INDEX), "Cannot insert the same value twice");
         data.addValue(value.getColumn().getName(), createBind(value.getValue()));
         if constexpr(types::PackSize<VV...>)
