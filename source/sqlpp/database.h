@@ -1,39 +1,35 @@
 #ifndef SQLPP_DATABASE_H_
 #define SQLPP_DATABASE_H_
 
-#include <sqlpp/types.h>
 #include <sqlpp/result.h>
+#include <sqlpp/types.h>
 
 #include <string>
 
 struct sqlite3;
 
-namespace sqlpp
-{
+namespace sqlpp {
 
-class Database
-{
-public:
-    explicit Database(const std::string& filename);
-    Database(const Database&) = delete;
-    Database(Database&& other);
+class Database {
+ public:
+  explicit Database(const std::string& filename);
+  Database(const Database&) = delete;
+  Database(Database&& other);
 
-    ~Database();
+  ~Database();
 
-    Database& operator=(const Database&) = delete;
-    Database& operator=(Database&& other);
+  Database& operator=(const Database&) = delete;
+  Database& operator=(Database&& other);
 
-    sqlite3* handle() const
-    {
-        return db;
-    }
+  sqlite3* handle() const { return db; }
 
-    Result execute(const std::string& sql, const std::vector<Bind>& values = {}) const;
+  Result execute(const std::string& sql,
+                 const std::vector<Bind>& values = {}) const;
 
-private:
-    sqlite3* db = nullptr;
+ private:
+  sqlite3* db = nullptr;
 };
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SQLPP_DATABASE_H_ */

@@ -1,7 +1,6 @@
 #include <sqlpp/stmt/common.h>
 
-namespace sqlpp
-{
+namespace sqlpp {
 
 Statement::Statement() = default;
 Statement::Statement(Statement&&) = default;
