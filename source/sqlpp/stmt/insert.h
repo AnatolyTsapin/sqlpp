@@ -1,7 +1,7 @@
 #ifndef SRC_SQLPP_STMT_INSERT_H_
 #define SRC_SQLPP_STMT_INSERT_H_
 
-#include <sqlpp/stmt/common.h>
+#include "common.h"
 
 namespace sqlpp {
 namespace stmt {
@@ -127,7 +127,7 @@ class InsertValues final : public StatementD<InsertData> {
   }
 };
 
-} /* namespace stmt */
+}  // namespace stmt
 
 template <typename T, typename... V>
 inline stmt::Insert<Table<T, V...>> insertInto(const Table<T, V...>& table) {
@@ -141,6 +141,6 @@ inline stmt::InsertValues<typename V::Table> insertValues(V&& value,
       std::forward<V>(value), std::forward<VV>(values)...);
 }
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_STMT_INSERT_H_ */

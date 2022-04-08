@@ -1,8 +1,9 @@
 #ifndef SRC_SQLPP_STMT_UPDATE_H_
 #define SRC_SQLPP_STMT_UPDATE_H_
 
-#include <sqlpp/expr/condition.h>
-#include <sqlpp/stmt/common.h>
+#include "../expr/condition.h"
+#include "../expr/node.h"
+#include "common.h"
 
 namespace sqlpp {
 namespace stmt {
@@ -97,7 +98,7 @@ class UpdateWhere final : public StatementD<UpdateData> {
   ~UpdateWhere() override = default;
 };
 
-} /* namespace stmt */
+}  // namespace stmt
 
 template <typename A, typename... AA>
 stmt::Update<typename A::Table> update(A&& a, AA&&... aa) {
@@ -105,6 +106,6 @@ stmt::Update<typename A::Table> update(A&& a, AA&&... aa) {
                                                std::forward<AA>(aa)...);
 }
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_STMT_UPDATE_H_ */

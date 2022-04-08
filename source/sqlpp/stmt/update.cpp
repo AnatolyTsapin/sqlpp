@@ -1,14 +1,12 @@
-#include <sqlpp/database.h>
-#include <sqlpp/stmt/update.h>
+#include "update.h"
 
 #include <sstream>
 
-using namespace std;
+#include "../database.h"
 
-namespace sqlpp {
-namespace stmt {
+namespace sqlpp::stmt {
 
-UpdateData::UpdateData(const string& tableName) : tableName(tableName) {}
+UpdateData::UpdateData(const std::string& tableName) : tableName(tableName) {}
 
 UpdateData::UpdateData(const UpdateData& other)
     : tableName(other.tableName), binds(other.binds) {
@@ -32,7 +30,8 @@ UpdateData& UpdateData::operator=(const UpdateData& other) {
 
 UpdateData& UpdateData::operator=(UpdateData&&) = default;
 
-void UpdateData::addAssignment(const string& column, const expr::Data& data) {
+void UpdateData::addAssignment(const std::string& column,
+                               const expr::Data& data) {
   addAssignment(column, expr::Data(data));
 }
 
@@ -52,7 +51,7 @@ void UpdateData::addCondition(expr::Data&& cond) {
   root = move(cond.root);
 }
 
-void UpdateData::dump(ostream& stream) const {
+void UpdateData::dump(std::ostream& stream) const {
   stream << "UPDATE " << tableName << " SET ";
   bool first = true;
   for (const auto& a : assignemts) {
@@ -69,10 +68,9 @@ void UpdateData::dump(ostream& stream) const {
 }
 
 Result UpdateData::execute(const Database& db) const {
-  ostringstream ss;
+  std::ostringstream ss;
   dump(ss);
   return db.execute(ss.str(), binds);
 }
 
-} /* namespace stmt */
-} /* namespace sqlpp */
+}  // namespace sqlpp::stmt

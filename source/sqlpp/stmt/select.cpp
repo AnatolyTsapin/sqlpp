@@ -1,13 +1,11 @@
-#include <sqlpp/database.h>
-#include <sqlpp/stmt/select.h>
+#include "select.h"
 
 #include <algorithm>
 #include <sstream>
 
-using namespace std;
+#include "../database.h"
 
-namespace sqlpp {
-namespace stmt {
+namespace sqlpp::stmt {
 
 SelectData::SelectData() {}
 
@@ -39,7 +37,8 @@ SelectData& SelectData::operator=(const SelectData& other) {
 
 SelectData& SelectData::operator=(SelectData&&) = default;
 
-void SelectData::addColumn(const string& tableName, const string& columnName) {
+void SelectData::addColumn(const std::string& tableName,
+                           const std::string& columnName) {
   columns.push_back(tableName + "." + columnName);
   tables.insert(tableName);
 }
@@ -78,7 +77,7 @@ void SelectData::addOrderBy(expr::Data&& order) {
 
 void SelectData::addLimit(size_t l) { limit = l; }
 
-void SelectData::dump(ostream& stream) const {
+void SelectData::dump(std::ostream& stream) const {
   stream << "SELECT ";
   bool first = true;
   for (const auto& c : columns) {
@@ -123,10 +122,9 @@ void SelectData::dump(ostream& stream) const {
 }
 
 Result SelectData::execute(const Database& db) const {
-  ostringstream ss;
+  std::ostringstream ss;
   dump(ss);
   return db.execute(ss.str(), binds);
 }
 
-} /* namespace stmt */
-} /* namespace sqlpp */
+}  // namespace sqlpp::stmt

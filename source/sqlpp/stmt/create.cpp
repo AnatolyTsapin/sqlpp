@@ -1,14 +1,12 @@
-#include <sqlpp/database.h>
-#include <sqlpp/stmt/create.h>
+#include "create.h"
 
 #include <sstream>
 
-using namespace std;
+#include "../database.h"
 
-namespace sqlpp {
-namespace stmt {
+namespace sqlpp::stmt {
 
-CreateTableData::CreateTableData(string const& tableName, bool ifNotExists)
+CreateTableData::CreateTableData(std::string const& tableName, bool ifNotExists)
     : tableName(tableName), ifNotExists(ifNotExists) {}
 
 CreateTableData::CreateTableData(CreateTableData const&) = default;
@@ -16,11 +14,12 @@ CreateTableData::CreateTableData(CreateTableData&&) = default;
 CreateTableData& CreateTableData::operator=(CreateTableData const&) = default;
 CreateTableData& CreateTableData::operator=(CreateTableData&&) = default;
 
-void CreateTableData::addColumnDesc(const string& name, const string& type) {
+void CreateTableData::addColumnDesc(const std::string& name,
+                                    const std::string& type) {
   columnDesc.emplace_back(name, type);
 }
 
-void CreateTableData::dump(ostream& stream) const {
+void CreateTableData::dump(std::ostream& stream) const {
   stream << "CREATE TABLE ";
   if (ifNotExists) stream << "IF NOT EXISTS ";
   stream << tableName << " (";
@@ -34,13 +33,13 @@ void CreateTableData::dump(ostream& stream) const {
 }
 
 Result CreateTableData::execute(const Database& db) const {
-  ostringstream ss;
+  std::ostringstream ss;
   dump(ss);
   return db.execute(ss.str());
 }
 
-CreateTableData::ColumnDesc::ColumnDesc(const string& name, const string& type)
+CreateTableData::ColumnDesc::ColumnDesc(const std::string& name,
+                                        const std::string& type)
     : name(name), type(type) {}
 
-} /* namespace stmt */
-} /* namespace sqlpp */
+}  // namespace sqlpp::stmt

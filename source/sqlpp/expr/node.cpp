@@ -1,13 +1,9 @@
-#include <sqlpp/expr/node.h>
+#include "node.h"
 
 #include <stdexcept>
 #include <vector>
 
-using namespace std;
-
-namespace sqlpp {
-
-namespace expr {
+namespace sqlpp::expr {
 
 enum class Precedence : int {
   OR,
@@ -27,7 +23,7 @@ Node::~Node() = default;
 
 Leaf::Leaf() : value("?") {}
 
-Leaf::Leaf(const string& table, const string& field)
+Leaf::Leaf(const std::string& table, const std::string& field)
     : value(table + "." + field) {}
 
 Leaf::Leaf(const Leaf& other) = default;
@@ -36,7 +32,7 @@ Leaf::~Leaf() = default;
 
 int Leaf::getPrecedence() const { return static_cast<int>(Precedence::VALUE); }
 
-void Leaf::dump(ostream& stream, bool parenthesis) const {
+void Leaf::dump(std::ostream& stream, bool parenthesis) const {
   if (parenthesis) stream << "(";
   stream << value;
   if (parenthesis) stream << ")";
@@ -57,8 +53,8 @@ int UnaryOperator::getPrecedence() const {
   return static_cast<int>(Precedence::UNARY);
 }
 
-void UnaryOperator::dump(ostream& stream, bool parenthesis) const {
-  static const vector<string> OpStr = {"-", "+", "~", "NOT "};
+void UnaryOperator::dump(std::ostream& stream, bool parenthesis) const {
+  static const std::vector<std::string> OpStr = {"-", "+", "~", "NOT "};
 
   if (parenthesis) stream << "(";
   stream << OpStr[static_cast<int>(op)];
@@ -116,12 +112,12 @@ int BinaryOperator::getPrecedence() const {
       return static_cast<int>(Precedence::OR);
 
     default:
-      throw invalid_argument("Unknown operation code");
+      throw std::invalid_argument("Unknown operation code");
   }
 }
 
-void BinaryOperator::dump(ostream& stream, bool parenthesis) const {
-  static const vector<string> OpStr = {
+void BinaryOperator::dump(std::ostream& stream, bool parenthesis) const {
+  static const std::vector<std::string> OpStr = {
       " * ", " / ",  " % ", " + ",  " - ", " << ", " >> ",  " & ", " | ",
       " < ", " <= ", " > ", " >= ", " = ", " <> ", " AND ", " OR "};
 
@@ -200,10 +196,8 @@ Data& Data::operator=(const Data& other) {
 
 Data& Data::operator=(Data&& other) = default;
 
-void Data::dump(ostream& stream) const {
+void Data::dump(std::ostream& stream) const {
   if (root) root->dump(stream);
 }
 
-} /* namespace expr */
-
-} /* namespace sqlpp */
+}  // namespace sqlpp::expr

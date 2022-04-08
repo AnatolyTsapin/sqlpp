@@ -1,7 +1,7 @@
 #ifndef SRC_SQLPP_STMT_CREATE_H_
 #define SRC_SQLPP_STMT_CREATE_H_
 
-#include <sqlpp/stmt/common.h>
+#include "common.h"
 
 namespace sqlpp {
 namespace stmt {
@@ -62,7 +62,7 @@ class CreateTable final : public StatementD<CreateTableData> {
   }
 };
 
-} /* namespace stmt */
+}  // namespace stmt
 
 template <typename T, typename... V>
 inline stmt::CreateTable<T, V...> createTable(const Table<T, V...>& table) {
@@ -75,6 +75,6 @@ inline stmt::CreateTable<T, V...> createTableIfNotExists(
   return stmt::CreateTable<T, V...>::make(table, true);
 }
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_STMT_CREATE_H_ */

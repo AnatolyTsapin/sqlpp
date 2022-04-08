@@ -1,21 +1,21 @@
+#include "database.h"
+
 #include <sqlite3.h>
-#include <sqlpp/database.h>
 
 #include <stdexcept>
 
-using namespace std;
-
 namespace sqlpp {
 
-Database::Database(const string& filename) {
+Database::Database(const std::string& filename) {
   auto rc = sqlite3_open(filename.c_str(), &db);
   if (rc != SQLITE_OK) {
-    string err(sqlite3_errmsg(db));
-    throw runtime_error("Cannot open database \"" + filename + "\": " + err);
+    std::string err(sqlite3_errmsg(db));
+    throw std::runtime_error("Cannot open database \"" + filename +
+                             "\": " + err);
   }
 }
 
-Database::Database(Database&& other) { swap(db, other.db); }
+Database::Database(Database&& other) { std::swap(db, other.db); }
 
 Database::~Database() {
   if (db) sqlite3_close(db);
@@ -23,7 +23,7 @@ Database::~Database() {
 
 Database& Database::operator=(Database&& other) {
   if (this != &other) {
-    swap(db, other.db);
+    std::swap(db, other.db);
     if (other.db) {
       sqlite3_close(other.db);
       other.db = nullptr;
@@ -32,12 +32,14 @@ Database& Database::operator=(Database&& other) {
   return *this;
 }
 
-Result Database::execute(const string& sql, const vector<Bind>& values) const {
+Result Database::execute(const std::string& sql,
+                         const std::vector<Bind>& values) const {
   sqlite3_stmt* stmt = nullptr;
   auto rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
   if (rc != SQLITE_OK) {
-    string err(sqlite3_errmsg(db));
-    throw runtime_error("SQLite error in statement \"" + sql + "\": " + err);
+    std::string err(sqlite3_errmsg(db));
+    throw std::runtime_error("SQLite error in statement \"" + sql +
+                             "\": " + err);
   }
 
   Result res(stmt);
@@ -50,4 +52,4 @@ Result Database::execute(const string& sql, const vector<Bind>& values) const {
   return res;
 }
 
-} /* namespace sqlpp */
+}  // namespace sqlpp

@@ -1,7 +1,7 @@
 #ifndef SRC_SQLPP_EXPR_CONDITION_H_
 #define SRC_SQLPP_EXPR_CONDITION_H_
 
-#include <sqlpp/expr/expression.h>
+#include "expression.h"
 
 namespace sqlpp {
 
@@ -177,8 +177,8 @@ CondResult<BoolExpr, C1, C2> operator||(C1&& c1, C2&& c2) {
       BinaryOperator::Op::OR, std::forward<C1>(c1), std::forward<C2>(c2));
 }
 
-} /* namespace expr */
+}  // namespace expr
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
-#endif /* SRC_SQLPP_EXPR_CONDITION_H_ */
+#endif

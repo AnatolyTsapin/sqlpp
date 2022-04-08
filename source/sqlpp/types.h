@@ -358,8 +358,8 @@ struct AddIntListS<J, IntList<I...>> {
   using Type = IntList<J, I...>;
 };
 
-} /* namespace types */
+}  // namespace types
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SQLPP_TYPES_H_ */

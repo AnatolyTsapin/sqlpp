@@ -1,10 +1,10 @@
 #ifndef SQLPP_DATABASE_H_
 #define SQLPP_DATABASE_H_
 
-#include <sqlpp/result.h>
-#include <sqlpp/types.h>
-
 #include <string>
+
+#include "result.h"
+#include "types.h"
 
 struct sqlite3;
 

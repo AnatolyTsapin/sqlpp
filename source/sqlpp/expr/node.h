@@ -1,11 +1,11 @@
 #ifndef SRC_SQLPP_EXPR_NODE_H_
 #define SRC_SQLPP_EXPR_NODE_H_
 
-#include <sqlpp/types.h>
-
 #include <iostream>
 #include <memory>
 #include <unordered_set>
+
+#include "../types.h"
 
 namespace sqlpp {
 
@@ -160,8 +160,8 @@ class Data {
   friend class stmt::UpdateData;
 };
 
-} /* namespace expr */
+}  // namespace expr
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_EXPR_NODE_H_ */

@@ -1,28 +1,26 @@
-#include <sqlpp/database.h>
-#include <sqlpp/stmt/insert.h>
+#include "insert.h"
 
 #include <sstream>
 
-using namespace std;
+#include "../database.h"
 
-namespace sqlpp {
-namespace stmt {
+namespace sqlpp::stmt {
 
-InsertData::InsertData(const string& tableName) : tableName(tableName) {}
+InsertData::InsertData(const std::string& tableName) : tableName(tableName) {}
 
 InsertData::InsertData(const InsertData&) = default;
 InsertData::InsertData(InsertData&&) = default;
 InsertData& InsertData::operator=(const InsertData&) = default;
 InsertData& InsertData::operator=(InsertData&&) = default;
 
-void InsertData::addValue(const string& name, Bind bind) {
+void InsertData::addValue(const std::string& name, Bind bind) {
   names.emplace_back(name);
   binds.emplace_back(move(bind));
 }
 
 void InsertData::addValue(Bind bind) { binds.emplace_back(move(bind)); }
 
-void InsertData::dump(ostream& stream) const {
+void InsertData::dump(std::ostream& stream) const {
   stream << "INSERT INTO " << tableName;
   if (binds.empty()) {
     stream << " DEFAULT VALUES";
@@ -36,7 +34,7 @@ void InsertData::dump(ostream& stream) const {
   } else {
     stream << " (";
     bool first = true;
-    stringstream valStream;
+    std::stringstream valStream;
     for (auto&& n : names) {
       if (!first) {
         stream << ", ";
@@ -51,10 +49,9 @@ void InsertData::dump(ostream& stream) const {
 }
 
 Result InsertData::execute(const Database& db) const {
-  ostringstream ss;
+  std::ostringstream ss;
   dump(ss);
   return db.execute(ss.str(), binds);
 }
 
-} /* namespace stmt */
-} /* namespace sqlpp */
+}  // namespace sqlpp::stmt

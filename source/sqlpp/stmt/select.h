@@ -1,10 +1,10 @@
 #ifndef SRC_SQLPP_STMT_SELECT_H_
 #define SRC_SQLPP_STMT_SELECT_H_
 
-#include <sqlpp/expr/condition.h>
-#include <sqlpp/stmt/common.h>
-
 #include <unordered_set>
+
+#include "../expr/condition.h"
+#include "common.h"
 
 namespace sqlpp {
 namespace stmt {
@@ -217,7 +217,7 @@ class Select : public SelectWhere<T, V> {
   }
 };
 
-} /* namespace stmt */
+}  // namespace stmt
 
 template <typename R, typename... RR>
 inline auto select(R&& result, RR&&... results) {
@@ -229,6 +229,6 @@ inline auto select(R&& result, RR&&... results) {
                                             std::forward<RR>(results)...);
 }
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_STMT_SELECT_H_ */

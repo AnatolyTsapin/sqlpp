@@ -1,7 +1,7 @@
 #ifndef SRC_SQLPP_ASSIGNMENT_H_
 #define SRC_SQLPP_ASSIGNMENT_H_
 
-#include <sqlpp/expr/expression.h>
+#include "expr/expression.h"
 
 namespace sqlpp {
 

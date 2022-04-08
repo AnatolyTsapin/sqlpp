@@ -1,8 +1,9 @@
 #include <sqlpp.h>
 
-using namespace std;
+using namespace std::string_literals;
 
-class TestTable final : public sqlpp::Table<TestTable, int, string, double> {
+class TestTable final
+    : public sqlpp::Table<TestTable, int, std::string, double> {
  public:
   TestTable() : Table("Test", {"id", "comment", "value"}) {}
 
@@ -11,7 +12,7 @@ class TestTable final : public sqlpp::Table<TestTable, int, string, double> {
   Column<2> value = column<2>();
 };
 
-class AnotherTable final : public sqlpp::Table<AnotherTable, int, string> {
+class AnotherTable final : public sqlpp::Table<AnotherTable, int, std::string> {
  public:
   AnotherTable() : Table("Another", {"id", "value"}) {}
 

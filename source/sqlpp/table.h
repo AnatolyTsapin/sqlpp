@@ -1,11 +1,11 @@
 #ifndef SQLPP_TABLE_H_
 #define SQLPP_TABLE_H_
 
-#include <sqlpp/column.h>
-#include <sqlpp/types.h>
-
 #include <array>
 #include <string>
+
+#include "column.h"
+#include "types.h"
 
 namespace sqlpp {
 
@@ -43,6 +43,6 @@ class Table {
   const std::array<std::string, COLUMN_COUNT> columnNames;
 };
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SQLPP_TABLE_H_ */

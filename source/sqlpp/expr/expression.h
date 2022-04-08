@@ -1,7 +1,7 @@
 #ifndef SRC_SQLPP_EXPR_EXPRESSION_H_
 #define SRC_SQLPP_EXPR_EXPRESSION_H_
 
-#include <sqlpp/expr/node.h>
+#include "node.h"
 
 namespace sqlpp {
 
@@ -315,8 +315,8 @@ ExprResult<IntExpr, E> operator|(LiteralTerm<IntExpr, E>&& l, E&& e) {
                                 std::forward<E>(e));
 }
 
-} /* namespace expr */
+}  // namespace expr
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
-#endif /* SRC_SQLPP_EXPR_EXPRESSION_H_ */
+#endif

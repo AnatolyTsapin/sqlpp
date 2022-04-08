@@ -1,7 +1,7 @@
 #ifndef SQLPP_VALUE_H_
 #define SQLPP_VALUE_H_
 
-#include <sqlpp/types.h>
+#include "types.h"
 
 namespace sqlpp {
 
@@ -29,6 +29,6 @@ class Value {
   ValueT value;
 };
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SQLPP_VALUE_H_ */

@@ -1,13 +1,13 @@
 #ifndef SRC_SQLPP_STMT_COMMON_H_
 #define SRC_SQLPP_STMT_COMMON_H_
 
-#include <sqlpp/result.h>
-#include <sqlpp/table.h>
-
 #include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "../result.h"
+#include "../table.h"
 
 namespace sqlpp {
 
@@ -57,7 +57,7 @@ class StatementD : public Statement {
   D data;
 };
 
-} /* namespace stmt */
-} /* namespace sqlpp */
+}  // namespace stmt
+}  // namespace sqlpp
 
 #endif /* SRC_SQLPP_STMT_COMMON_H_ */

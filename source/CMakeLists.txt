@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 
 project(SQLpp)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -g -I.")
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

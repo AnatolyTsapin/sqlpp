@@ -3,7 +3,6 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
 using namespace sqlpp;
 
 struct MyType {
@@ -15,7 +14,7 @@ bool operator==(const MyType& l, const MyType& r) {
   return l.iValue == r.iValue && l.sValue == r.sValue;
 }
 
-ostream& operator<<(ostream& s, const MyType& v) {
+std::ostream& operator<<(std::ostream& s, const MyType& v) {
   s << "{ " << v.iValue << ", " << v.sValue << " }";
   return s;
 }
@@ -67,36 +66,36 @@ int main(int argc, char* argv[]) try {
 
   auto selStmt = select(mt);
   auto res = selStmt.executeT(db);
-  for (size_t i = 0; i < res.count(); ++i) cout << "|" << res.name(i);
-  cout << "|" << endl;
+  for (size_t i = 0; i < res.count(); ++i) std::cout << "|" << res.name(i);
+  std::cout << "|" << std::endl;
 
   while (res.hasData()) {
-    cout << "|" << res.get<0>().value();
-    cout << "|" << res.get<1>().value();
-    cout << "|" << endl;
+    std::cout << "|" << res.get<0>().value();
+    std::cout << "|" << res.get<1>().value();
+    std::cout << "|" << std::endl;
     if (!(in[res.get<0>().value()] == res.get<1>().value()))
-      throw runtime_error("Comparison error");
+      throw std::runtime_error("Comparison error");
     res.next();
   }
 
   auto res2 = select(mt).where(mt.data == in[1]).executeT(db);
-  for (size_t i = 0; i < res2.count(); ++i) cout << "|" << res2.name(i);
-  cout << "|" << endl;
+  for (size_t i = 0; i < res2.count(); ++i) std::cout << "|" << res2.name(i);
+  std::cout << "|" << std::endl;
 
   while (res2.hasData()) {
-    cout << "|" << res2.get<0>().value();
-    cout << "|" << res2.get<1>().value();
-    cout << "|" << endl;
+    std::cout << "|" << res2.get<0>().value();
+    std::cout << "|" << res2.get<1>().value();
+    std::cout << "|" << std::endl;
     if (!(in[1] == res2.get<1>().value()))
-      throw runtime_error("Comparison error");
+      throw std::runtime_error("Comparison error");
     res2.next();
   }
 
   return 0;
-} catch (const exception& e) {
-  cerr << "Error: " << e.what() << endl;
+} catch (const std::exception& e) {
+  std::cerr << "Error: " << e.what() << std::endl;
   return 1;
 } catch (...) {
-  cerr << "Unknown error" << endl;
+  std::cerr << "Unknown error" << std::endl;
   return 2;
 }

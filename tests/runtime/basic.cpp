@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-using namespace std;
 using namespace sqlpp;
+using namespace std::string_literals;
 
-class MyTable final : public Table<MyTable, int, string> {
+class MyTable final : public Table<MyTable, int, std::string> {
  public:
   MyTable() : Table("MyTable", {"id", "text"}) {}
 
@@ -13,7 +13,7 @@ class MyTable final : public Table<MyTable, int, string> {
   Column<1> text = column<1>();
 };
 
-class YaTable final : public Table<YaTable, char, string, double> {
+class YaTable final : public Table<YaTable, char, std::string, double> {
  public:
   YaTable() : Table("YaTable", {"id", "comment", "value"}) {}
   ~YaTable() override = default;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) try {
 
   auto upStmt =
       update(yt.value = yt.value + 1.0, yt.id = yt.id + '0').where(yt.id > 0);
-  cout << upStmt << endl;
+  std::cout << upStmt << std::endl;
   upStmt.execute(db);
 
   auto c = yt.id == 0;
@@ -53,18 +53,18 @@ int main(int argc, char* argv[]) try {
   auto selStmt = select(yt).where(
       0 == yt.id && c ||
       yt.value == 1.2 && (~(yt.id + 1) == -mt.id || yt.comment != "Test"s));
-  cout << selStmt << endl;
+  std::cout << selStmt << std::endl;
   selStmt.execute(db);
 
   auto selStmt2 = select(yt, mt.id);
   auto res = selStmt2.executeT(db);
-  for (size_t i = 0; i < res.count(); ++i) cout << "|" << res.name(i);
-  cout << "|" << endl;
+  for (size_t i = 0; i < res.count(); ++i) std::cout << "|" << res.name(i);
+  std::cout << "|" << std::endl;
   while (res.hasData()) {
-    cout << "|" << res.get<0>().value_or('c');
-    cout << "|" << res.get<1>().value_or("NULL");
-    cout << "|" << res.get<2>().value_or(3.14);
-    cout << "|" << endl;
+    std::cout << "|" << res.get<0>().value_or('c');
+    std::cout << "|" << res.get<1>().value_or("NULL");
+    std::cout << "|" << res.get<2>().value_or(3.14);
+    std::cout << "|" << std::endl;
     res.next();
   }
 
@@ -73,13 +73,13 @@ int main(int argc, char* argv[]) try {
                       .groupBy(mt.id - 1, mt.text)
                       .orderBy(mt.id, yt.comment)
                       .limit(10);
-  cout << selStmt3 << endl;
+  std::cout << selStmt3 << std::endl;
 
   return 0;
-} catch (const exception& e) {
-  cerr << "Error: " << e.what() << endl;
+} catch (const std::exception& e) {
+  std::cerr << "Error: " << e.what() << std::endl;
   return 1;
 } catch (...) {
-  cerr << "Unknown error" << endl;
+  std::cerr << "Unknown error" << std::endl;
   return 2;
 }

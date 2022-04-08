@@ -1,10 +1,10 @@
 #ifndef SRC_SQLPP_RESULT_H_
 #define SRC_SQLPP_RESULT_H_
 
-#include <sqlpp/types.h>
-
 #include <optional>
 #include <string>
+
+#include "types.h"
 
 struct sqlite3_stmt;
 

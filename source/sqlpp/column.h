@@ -1,12 +1,12 @@
 #ifndef SQLPP_COLUMN_H_
 #define SQLPP_COLUMN_H_
 
-#include <sqlpp/assignment.h>
-#include <sqlpp/expr/expression.h>
-#include <sqlpp/types.h>
-#include <sqlpp/value.h>
-
 #include <string>
+
+#include "assignment.h"
+#include "expr/expression.h"
+#include "types.h"
+#include "value.h"
 
 namespace sqlpp {
 
@@ -41,6 +41,6 @@ class Column : public expr::Expression<types::MakeSet<T>, DbType<V>> {
   const std::string name;
 };
 
-} /* namespace sqlpp */
+}  // namespace sqlpp
 
 #endif /* SQLPP_COLUMN_H_ */
